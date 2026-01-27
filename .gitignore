@@ -1,0 +1,30 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+**/venv/
+
+# SQLite database files
+*.sqlite3
+
+# VSCode settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# Python logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pipenv files if you don't want to include them (optional)
+# Pipfile.lock
+
+
+django/**/migrations/
