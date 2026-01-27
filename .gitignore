@@ -27,4 +27,4 @@ Thumbs.db
 # Pipfile.lock
 
 
-django_app/**/migrations/
+django/**/migrations/
