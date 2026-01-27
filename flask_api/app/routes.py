@@ -1,25 +1,14 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from config import Config
-from models import db, Story, Page, Choice
+from flask import Blueprint, request, jsonify
+from .extensions import db
+from .models import Story, Page, Choice
 
-# Create WSGI app instance
-app = Flask(__name__)
-# Config purposes
-app.config.from_object(Config)
-# Bind app to db obj, maintaining Application Factory pattern
-db.init_app(app)
-# Allow communication between frontend and backend
-CORS(app)
-
-# Create DB
-with app.app_context():
-    db.create_all()
+# Define blueprint to prevent circular imports
+main_bp = Blueprint('main', __name__)
 
 ##############################  Story Routing   ##############################
 
 # Get all
-@app.route("/stories")
+@main_bp.route("/stories")
 def get_stories():
     status = request.args.get("status")
     if status:
@@ -33,7 +22,7 @@ def get_stories():
     ])
 
 # Get story
-@app.route("/stories/<int:story_id>")
+@main_bp.route("/stories/<int:story_id>")
 def get_story(story_id):
     story = Story.query.get_or_404(story_id)
     return jsonify({
@@ -44,7 +33,7 @@ def get_story(story_id):
     })
 
 # Get story start page
-@app.route("/stories/<int:story_id>/start")
+@main_bp.route("/stories/<int:story_id>/start")
 def get_start_page(story_id):
     story = Story.query.get_or_404(story_id)
     if not story.start_page_id:
@@ -54,7 +43,7 @@ def get_start_page(story_id):
 
 
 # Create
-@app.route("/stories", methods=["POST"])
+@main_bp.route("/stories", methods=["POST"])
 def create_story():
     data = request.json
     story = Story(
@@ -68,7 +57,7 @@ def create_story():
 
 
 # Update
-@app.route("/stories/<int:story_id>", methods=["PUT"])
+@main_bp.route("/stories/<int:story_id>", methods=["PUT"])
 def update_story(story_id):
     story = Story.query.get_or_404(story_id)
     data = request.json
@@ -83,7 +72,7 @@ def update_story(story_id):
 
 
 # Delete
-@app.route("/stories/<int:story_id>", methods=["DELETE"])
+@main_bp.route("/stories/<int:story_id>", methods=["DELETE"])
 def delete_story(story_id):
     story = Story.query.get_or_404(story_id)
     db.session.delete(story)
@@ -93,7 +82,7 @@ def delete_story(story_id):
 ##############################  Page Routing   ##############################
 
 # Get
-@app.route("/pages/<int:page_id>")
+@main_bp.route("/pages/<int:page_id>")
 def get_page(page_id):
     page = Page.query.get_or_404(page_id)
     choices = Choice.query.filter_by(page_id=page.id).all()
@@ -111,7 +100,7 @@ def get_page(page_id):
 
 
 # Create
-@app.route("/stories/<int:story_id>/pages", methods=["POST"])
+@main_bp.route("/stories/<int:story_id>/pages", methods=["POST"])
 def create_page(story_id):
     data = request.json
     page = Page(
@@ -126,7 +115,7 @@ def create_page(story_id):
 
 ##############################  Choice Routing   ##############################
 
-@app.route("/pages/<int:page_id>/choices", methods=["POST"])
+@main_bp.route("/pages/<int:page_id>/choices", methods=["POST"])
 def create_choice(page_id):
     data = request.json
     choice = Choice(
@@ -137,6 +126,3 @@ def create_choice(page_id):
     db.session.add(choice)
     db.session.commit()
     return jsonify({"id": choice.id}), 201
-
-if __name__ == "__main__":
-    app.run(debug=True)
