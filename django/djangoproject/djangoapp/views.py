@@ -27,4 +27,4 @@ def play_page(request, page_id):
         )
         return render(request, "game/ending.html", {"page": page})
 
-    return render(request, "game/play.html", {"page": page})
+    return render(request, "game/story_play.html", {"page": page})
