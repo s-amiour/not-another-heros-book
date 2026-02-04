@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-8">
+
+  <h2 class="text-2xl font-semibold mb-4">Story Statistics</h2>
+  <p class="mb-4"><strong>Total plays:</strong> {{ total }}</p>
+
+  <table class="w-full border-collapse border border-gray-300 mb-6">
+    <tr class="bg-gray-100">
+      <th class="border border-gray-300 px-4 py-2">Ending Page ID</th>
+      <th class="border border-gray-300 px-4 py-2">Plays</th>
+      <th class="border border-gray-300 px-4 py-2">Percentage</th>
+    </tr>
+    {% for ending in endings %}
+    <tr>
+      <td class="border border-gray-300 px-4 py-2">{{ ending.ending_page_id }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ ending.count }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ ending.percent }}%</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if page %}
+  <h3 class="text-xl font-semibold mb-2">Page Preview</h3>
+  <p class="mb-2">{{ page.text }}</p>
+  <ul class="space-y-2 mb-4">
+    {% for c in page.choices %}
+      <li>
+        <a href="{% url 'play_page' c.next_page_id %}" 
+           class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          {{ c.text }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <p>
+    <a href="{% url 'story_list' %}" class="text-blue-600 hover:text-blue-800">Back to Stories</a>
+  </p>
+
+</div>
+{% endblock %}

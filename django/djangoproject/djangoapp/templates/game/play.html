@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-8 bg-white rounded shadow">
+
+  <h2 class="text-2xl font-semibold mb-4">{{ page.text }}</h2>
+
+  {% if page.choices %}
+  <ul class="space-y-2">
+    {% for c in page.choices %}
+      <li>
+        <a href="{% url 'play_page' c.next_page_id %}" 
+           class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+          {{ c.text }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="mt-4 text-gray-600">No choices available.</p>
+  {% endif %}
+
+  {% if preview %}
+    <p class="mt-4 text-yellow-600">You are in <strong>preview mode</strong>. Stats will not be recorded.</p>
+  {% endif %}
+
+  <a href="{% url 'story_list' %}" 
+     class="inline-block mt-6 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+    Back to Stories
+  </a>
+</div>
+{% endblock %}

@@ -32,6 +32,20 @@ def get_story(story_id):
         "start_page_id": story.start_page_id
     })
 
+#Search story
+@main_bp.route("/stories/search")
+def search_stories():
+    q = request.args.get("q", "")
+    stories = Story.query.filter(
+        Story.title.ilike(f"%{q}%"),
+        Story.status == "published"
+    ).all()
+
+    return jsonify([
+        {"id": s.id, "title": s.title, "description": s.description}
+        for s in stories
+    ])
+
 # Get story start page
 @main_bp.route("/stories/<int:story_id>/start")
 def get_start_page(story_id):
@@ -86,9 +100,12 @@ def delete_story(story_id):
 def get_page(page_id):
     page = Page.query.get_or_404(page_id)
     choices = Choice.query.filter_by(page_id=page.id).all()
+    story = page.story    
 
     return jsonify({
         "id": page.id,
+        "story_id": story.id,              # NEW
+        "story_status": story.status, 
         "text": page.text,
         "is_ending": page.is_ending,
         "ending_label": page.ending_label,
