@@ -89,31 +89,31 @@ def story_delete(request, story_id):
 
 
 def play_page(request, page_id):
-    #Get page from Flask
+    # Get page info from Flask API
     r = requests.get(f"{FLASK_URL}/pages/{page_id}")
     page = r.json()
 
-    #Auto-save progress (anonymous)
+    # Determine if this is a preview (draft) mode
+    preview = request.GET.get("preview") == "1"
+
+    # Auto-save progress (PlaySession)
     session_id = get_session_id(request)
     PlaySession.objects.update_or_create(
         session_id=session_id,
-        story_id=page.get("story_id", page_id),  # use real story_id if Flask provides it
+        story_id=page["story_id"],
         defaults={"current_page_id": page_id}
     )
 
-    #If page is an ending
-    if page["is_ending"]:
-        story_status = page.get("story_status", "published")  # must include in Flask response
-        # Only save Play if story is published
-        if story_status != "draft":
-            Play.objects.create(
-                story_id=page.get("story_id", page_id),  # replace page_id with real story_id
-                ending_page_id=page_id
-            )
+    # If it's an ending page AND not preview, record the play
+    if page["is_ending"] and not preview:
+        Play.objects.create(
+            story_id=page["story_id"],
+            ending_page_id=page_id
+        )
         return render(request, "game/ending.html", {"page": page})
 
-    #Regular page rendering
-    return render(request, "game/play.html", {"page": page})
+    # Normal page display
+    return render(request, "game/play.html", {"page": page, "preview": preview})
 
 
 def resume_story(request, story_id):

@@ -1,19 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto p-8">
+<div class="max-w-2xl mx-auto p-8 bg-white rounded shadow">
 
-  <h2 class="text-2xl font-semibold mb-4 text-red-600">Ending Reached!</h2>
+  <!-- Ending title -->
+  <h2 class="text-2xl font-semibold mb-4">The End</h2>
 
-  <p class="mb-4">{{ page.text }}</p>
+  <!-- Page text -->
+  <p class="mb-4 text-gray-800">{{ page.text }}</p>
 
+  <!-- Ending label -->
   {% if page.ending_label %}
-    <p class="mb-4"><strong>Ending:</strong> {{ page.ending_label }}</p>
+    <p class="mb-4 px-3 py-2 inline-block bg-blue-100 text-blue-800 rounded">
+      Ending: {{ page.ending_label }}
+    </p>
   {% endif %}
 
-  <p>
-    <a href="{% url 'story_list' %}" class="text-blue-600 hover:text-blue-800">Back to Stories</a>
-  </p>
+  <!-- Preview note -->
+  {% if preview %}
+    <p class="mt-4 text-yellow-600">
+      You are viewing a draft preview. This play will <strong>not</strong> be counted in statistics.
+    </p>
+  {% endif %}
+
+  <!-- Back link -->
+  <a href="{% url 'story_list' %}" 
+     class="inline-block mt-6 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+    Back to Stories
+  </a>
 
 </div>
 {% endblock %}
+
