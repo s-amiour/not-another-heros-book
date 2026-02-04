@@ -1,0 +1,11 @@
+<h2>{{ page.text }}</h2>
+
+<ul>
+{% for c in page.choices %}
+  <li>
+    <a href="/play/{{ c.next_page_id }}/">
+      {{ c.text }}
+    </a>
+  </li>
+{% endfor %}
+</ul>

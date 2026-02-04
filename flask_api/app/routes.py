@@ -1,20 +1,14 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from config import Config
-from models import db, Story, Page, Choice
+from flask import Blueprint, request, jsonify
+from .extensions import db
+from .models import Story, Page, Choice
 
-app = Flask(__name__)
-app.config.from_object(Config)
-db.init_app(app)
-CORS(app)
+# Define blueprint to prevent circular imports
+main_bp = Blueprint('main', __name__)
 
-# Create DB
-with app.app_context():
-    db.create_all()
+##############################  Story Routing   ##############################
 
-# ---------- Reading Endpoints ----------
-
-@app.route("/stories")
+# Get all
+@main_bp.route("/stories")
 def get_stories():
     status = request.args.get("status")
     if status:
@@ -27,7 +21,8 @@ def get_stories():
         for s in stories
     ])
 
-@app.route("/stories/<int:story_id>")
+# Get story
+@main_bp.route("/stories/<int:story_id>")
 def get_story(story_id):
     story = Story.query.get_or_404(story_id)
     return jsonify({
@@ -37,12 +32,57 @@ def get_story(story_id):
         "start_page_id": story.start_page_id
     })
 
-@app.route("/stories/<int:story_id>/start")
+# Get story start page
+@main_bp.route("/stories/<int:story_id>/start")
 def get_start_page(story_id):
     story = Story.query.get_or_404(story_id)
+    if not story.start_page_id:
+        return jsonify({"error": "Story has no start page"}), 404
+    
     return jsonify({"start_page_id": story.start_page_id})
 
-@app.route("/pages/<int:page_id>")
+
+# Create
+@main_bp.route("/stories", methods=["POST"])
+def create_story():
+    data = request.json
+    story = Story(
+        title=data["title"],
+        description=data.get("description", ""),
+        status=data.get("status", "published")
+    )
+    db.session.add(story)
+    db.session.commit()
+    return jsonify({"id": story.id}), 201
+
+
+# Update
+@main_bp.route("/stories/<int:story_id>", methods=["PUT"])
+def update_story(story_id):
+    story = Story.query.get_or_404(story_id)
+    data = request.json
+
+    story.title = data.get("title", story.title)
+    story.description = data.get("description", story.description)
+    story.status = data.get("status", story.status)
+    story.start_page_id = data.get("start_page_id", story.start_page_id)
+
+    db.session.commit()
+    return jsonify({"message": "Story updated"})
+
+
+# Delete
+@main_bp.route("/stories/<int:story_id>", methods=["DELETE"])
+def delete_story(story_id):
+    story = Story.query.get_or_404(story_id)
+    db.session.delete(story)
+    db.session.commit()
+    return jsonify({"message": "Story deleted"})
+
+##############################  Page Routing   ##############################
+
+# Get
+@main_bp.route("/pages/<int:page_id>")
 def get_page(page_id):
     page = Page.query.get_or_404(page_id)
     choices = Choice.query.filter_by(page_id=page.id).all()
@@ -58,41 +98,9 @@ def get_page(page_id):
         ]
     })
 
-# ---------- Writing Endpoints ----------
 
-@app.route("/stories", methods=["POST"])
-def create_story():
-    data = request.json
-    story = Story(
-        title=data["title"],
-        description=data.get("description", ""),
-        status=data.get("status", "published")
-    )
-    db.session.add(story)
-    db.session.commit()
-    return jsonify({"id": story.id}), 201
-
-@app.route("/stories/<int:story_id>", methods=["PUT"])
-def update_story(story_id):
-    story = Story.query.get_or_404(story_id)
-    data = request.json
-
-    story.title = data.get("title", story.title)
-    story.description = data.get("description", story.description)
-    story.status = data.get("status", story.status)
-    story.start_page_id = data.get("start_page_id", story.start_page_id)
-
-    db.session.commit()
-    return jsonify({"message": "Story updated"})
-
-@app.route("/stories/<int:story_id>", methods=["DELETE"])
-def delete_story(story_id):
-    story = Story.query.get_or_404(story_id)
-    db.session.delete(story)
-    db.session.commit()
-    return jsonify({"message": "Story deleted"})
-
-@app.route("/stories/<int:story_id>/pages", methods=["POST"])
+# Create
+@main_bp.route("/stories/<int:story_id>/pages", methods=["POST"])
 def create_page(story_id):
     data = request.json
     page = Page(
@@ -105,7 +113,9 @@ def create_page(story_id):
     db.session.commit()
     return jsonify({"id": page.id}), 201
 
-@app.route("/pages/<int:page_id>/choices", methods=["POST"])
+##############################  Choice Routing   ##############################
+
+@main_bp.route("/pages/<int:page_id>/choices", methods=["POST"])
 def create_choice(page_id):
     data = request.json
     choice = Choice(
@@ -116,6 +126,3 @@ def create_choice(page_id):
     db.session.add(choice)
     db.session.commit()
     return jsonify({"id": choice.id}), 201
-
-if __name__ == "__main__":
-    app.run(debug=True)
