@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-8 bg-white rounded shadow">
+
+  <h2 class="text-2xl font-semibold mb-6">
+    {% if story %} Edit Story {% else %} Create New Story {% endif %}
+  </h2>
+
+  {% if error %}
+    <p class="text-red-600 mb-4">{{ error }}</p>
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+    
+    <label class="block mb-2 font-semibold">Title</label>
+    <input type="text" name="title" required
+           value="{{ story.title|default:'' }}"
+           class="w-full mb-4 px-3 py-2 border rounded">
+
+    <label class="block mb-2 font-semibold">Description</label>
+    <textarea name="description" rows="4"
+              class="w-full mb-4 px-3 py-2 border rounded">{{ story.description|default:'' }}</textarea>
+
+    <label class="block mb-2 font-semibold">Status</label>
+    <select name="status" class="w-full mb-4 px-3 py-2 border rounded">
+      <option value="published" {% if story.status == 'published' %}selected{% endif %}>Published</option>
+      <option value="draft" {% if story.status == 'draft' %}selected{% endif %}>Draft</option>
+    </select>
+
+    <button type="submit" 
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      {% if story %} Update Story {% else %} Create Story {% endif %}
+    </button>
+
+    <a href="{% url 'story_list' %}" 
+       class="ml-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+      Cancel
+    </a>
+  </form>
+
+</div>
+{% endblock %}

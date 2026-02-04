@@ -1,2 +1,19 @@
-<h1>THE END</h1>
-<p>{{ page.text }}</p>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-8">
+
+  <h2 class="text-2xl font-semibold mb-4 text-red-600">Ending Reached!</h2>
+
+  <p class="mb-4">{{ page.text }}</p>
+
+  {% if page.ending_label %}
+    <p class="mb-4"><strong>Ending:</strong> {{ page.ending_label }}</p>
+  {% endif %}
+
+  <p>
+    <a href="{% url 'story_list' %}" class="text-blue-600 hover:text-blue-800">Back to Stories</a>
+  </p>
+
+</div>
+{% endblock %}
