@@ -1,91 +1,71 @@
-import requests
-import uuid
-from django.db.models import Count
 from django.shortcuts import render, redirect
+from django.db.models import Count
+import uuid
 from .models import Play, PlaySession
+from .forms import StoryForm
+from .services import (
+    get_all_stories, get_story, create_story, update_story,
+    delete_story, get_page_content, get_start_page_id
+)
 
-# Create your views here.
-
-FLASK_URL = "http://127.0.0.1:5000"
 
 def get_session_id(request):
     if "session_id" not in request.session:
         request.session["session_id"] = str(uuid.uuid4())
     return request.session["session_id"]
 
+#############  Story CRUD  #############
 
+# --- READ ---
 def story_list(request):
-    r = requests.get(f"{FLASK_URL}/stories?status=published")
-    stories = r.json()
-    return render(request, "game/story_list.html", {"stories": stories})
+    stories = get_all_stories() # Fetches from Flask
+    return render(request, 'story_list.html', {'stories': stories})
 
 
+# --- CREATE ---
 def story_create(request):
+    if request.method == 'POST':
+        form = StoryForm(request.POST)
+        if form.is_valid():
+            if create_story(form.cleaned_data):
+                return redirect('story_list')
+    else:
+        form = StoryForm()
+    return render(request, 'story_form.html', {'form': form, 'title': 'Create Story'})
+
+
+# --- UPDATE ---
+def story_edit(request, story_id):
+    story_data = get_story(story_id)  # Fetch existing data
+    if not story_data:
+        return redirect('story_list')
+        
+    if request.method == 'POST':
+        form = StoryForm(request.POST)
+        if form.is_valid():
+            if update_story(story_id, form.cleaned_data):
+                return redirect('story_list')
+    else:
+        # Pre-fill
+        form = StoryForm(initial=story_data)
+        
+    return render(request, 'story_form.html', {'form': form, 'title': 'Edit Story'})
+
+
+# --- DELETE ---
+def story_delete(request, story_id):
     if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description", "")
-        status = request.POST.get("status", "published")
+        delete_story(story_id)
+    return redirect('story_list')
 
-        # Call Flask API to create the story
-        response = requests.post(
-            f"{FLASK_URL}/stories",
-            json={
-                "title": title,
-                "description": description,
-                "status": status
-            }
-        )
-        if response.status_code == 201:
-            return redirect("story_list")  # back to story list after creation
-        else:
-            error = response.json().get("error", "Unknown error")
-            return render(request, "game/story_form.html", {"error": error})
+########################################
 
-    # GET request: show empty form
-    return render(request, "game/story_form.html")
 
 
 def start_story(request, story_id):
     r = requests.get(f"{FLASK_URL}/stories/{story_id}/start")
     start_page_id = r.json()["start_page_id"]
     return redirect("play_page", page_id=start_page_id)
-
-
-def story_edit(request, story_id):
-    # GET: fetch story from Flask API
-    if request.method == "GET":
-        r = requests.get(f"{FLASK_URL}/stories/{story_id}")
-        if r.status_code != 200:
-            return render(request, "game/error.html", {"message": "Story not found"})
-        story = r.json()
-        return render(request, "game/story_form.html", {"story": story})
-
-    # POST: update story via Flask API
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description", "")
-        status = request.POST.get("status", "published")
-
-        r = requests.put(
-            f"{FLASK_URL}/stories/{story_id}",
-            json={
-                "title": title,
-                "description": description,
-                "status": status
-            }
-        )
-        if r.status_code == 200:
-            return redirect("story_list")
-        else:
-            error = r.json().get("error", "Unknown error")
-            return render(request, "game/story_form.html", {"story": {"id": story_id, "title": title, "description": description, "status": status}, "error": error})
-
-
-def story_delete(request, story_id):
-    if request.method == "POST":
-        r = requests.delete(f"{FLASK_URL}/stories/{story_id}")
-        # Optional: check r.status_code
-    return redirect("story_list")
 
 
 def play_page(request, page_id):
