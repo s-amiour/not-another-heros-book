@@ -16,6 +16,9 @@ venv/
 # PyCharm settings
 .idea/
 
+# Env variables
+.env
+
 # Python logs
 *.log
 
@@ -25,6 +28,3 @@ Thumbs.db
 
 # Pipenv files if you don't want to include them (optional)
 # Pipfile.lock
-
-
-django/**/migrations/
