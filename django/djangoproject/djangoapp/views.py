@@ -19,7 +19,7 @@ def get_session_id(request):
 # --- READ ---
 def story_list(request):
     stories = get_all_stories() # Fetches from Flask
-    return render(request, 'story_list.html', {'stories': stories})
+    return render(request, 'game/story_list.html', {'stories': stories})
 
 
 # --- CREATE ---
@@ -31,7 +31,7 @@ def story_create(request):
                 return redirect('story_list')
     else:
         form = StoryForm()
-    return render(request, 'story_form.html', {'form': form, 'title': 'Create Story'})
+    return render(request, 'game/story_form.html', {'form': form, 'title': 'Create Story'})
 
 
 # --- UPDATE ---
@@ -49,7 +49,7 @@ def story_edit(request, story_id):
         # Pre-fill
         form = StoryForm(initial=story_data)
         
-    return render(request, 'story_form.html', {'form': form, 'title': 'Edit Story'})
+    return render(request, 'game/story_form.html', {'form': form, 'title': 'Edit Story'})
 
 
 # --- DELETE ---
