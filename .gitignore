@@ -18,6 +18,7 @@ venv/
 
 # Env variables
 .env
+**/env
 
 # Python logs
 *.log
