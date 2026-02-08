@@ -83,7 +83,7 @@ def update_story(story_id):
     story.status = data.get("status", story.status)
     story.start_page_id = data.get("start_page_id", story.start_page_id)
 
-    db.session.commit()
+    db.session.commit()  # SET
     return jsonify({"message": "Story updated"})
 
 
