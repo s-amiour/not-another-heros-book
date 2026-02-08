@@ -4,24 +4,24 @@
 <div class="max-w-2xl mx-auto p-8 bg-white rounded shadow">
 
   <h2 class="text-2xl font-semibold mb-6">
-    {% if story %} Edit Story {% else %} Create New Story {% endif %}
+    {% if edit_as_title %} Edit Story {% else %} Create New Story {% endif %}
   </h2>
 
+  <!-- Not yet implemented as per level-->
   {% if error %}
     <p class="text-red-600 mb-4">{{ error }}</p>
   {% endif %}
 
-  <form method="POST">
+  <!-- FORM -->
+  <form method="post">
     {% csrf_token %}
     
     <label class="block mb-2 font-semibold">Title</label>
-    <input type="text" name="title" required
-           value="{{ story.title|default:'' }}"
-           class="w-full mb-4 px-3 py-2 border rounded">
+    <!-- the story context object has already been wrapped with StoryForm => no need for an element enclosing it -->
+    {{ story.title|default:'' }}
 
     <label class="block mb-2 font-semibold">Description</label>
-    <textarea name="description" rows="4"
-              class="w-full mb-4 px-3 py-2 border rounded">{{ story.description|default:'' }}</textarea>
+    {{ story.description|default:'' }}
 
     <label class="block mb-2 font-semibold">Status</label>
     <select name="status" class="w-full mb-4 px-3 py-2 border rounded">
@@ -29,9 +29,8 @@
       <option value="draft" {% if story.status == 'draft' %}selected{% endif %}>Draft</option>
     </select>
 
-    <button type="submit" 
-            class="px-4 py-2 bg-[#52796F] text-white rounded hover:bg-[#354F52]">
-      {% if story %} Update Story {% else %} Create Story {% endif %}
+    <button type="submit" class="px-4 py-2 bg-[#52796F] text-white rounded hover:bg-[#354F52]">
+      {% if edit_as_title %} Update Story {% else %} Create Story {% endif %}
     </button>
 
     <a href="{% url 'story_list' %}" 
