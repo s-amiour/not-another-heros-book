@@ -9,11 +9,12 @@ from .services import (
 )
 
 #>> Note: The context argument property string is so important; without it, the templates won't display properly
+#>> Sultan: commented out get_session_id() and resume_paeg() for now, uncomment once level13
 
-def get_session_id(request):
-    if "session_id" not in request.session:
-        request.session["session_id"] = str(uuid.uuid4())
-    return request.session["session_id"]
+# def get_session_id(request):
+#     if "session_id" not in request.session:
+#         request.session["session_id"] = str(uuid.uuid4())
+#     return request.session["session_id"]
 
 #############  Story CRUD  #############
 
@@ -66,53 +67,58 @@ def story_delete(request, story_id):
 
 
 def start_story(request, story_id):
-    r = requests.get(f"{FLASK_URL}/stories/{story_id}/start")
-    start_page_id = r.json()["start_page_id"]
-    return redirect("play_page", page_id=start_page_id)
+    """Redirect browser to the play_page for that ID."""
+    start_page_id = get_start_page_id(story_id)
+    
+    if start_page_id:
+        # Redirect to the actual game page
+        return redirect("play_page", story_id=story_id, page_id=start_page_id)
+    else:
+        # Error handling: Story has no pages yet
+        return redirect("story_list")
 
 
-def play_page(request, page_id):
-    # Get page info from Flask API
-    r = requests.get(f"{FLASK_URL}/pages/{page_id}")
-    page = r.json()
+def play_page(request, story_id, page_id):
+    """
+    1. Fetches page content (text + choices) from Flask.
+    2. Checks if it is an ENDING.
+    3. If ending -> Save stats to Django DB.
+    """
+    # A. Fetch Content
+    page_content = get_page_content(page_id)
+    
+    if not page_content:
+        return render(request, "game/error.html", {"message": "Page not found"})
 
-    # Determine if this is a preview (draft) mode
-    preview = request.GET.get("preview") == "1"
-
-    # Auto-save progress (PlaySession)
-    session_id = get_session_id(request)
-    PlaySession.objects.update_or_create(
-        session_id=session_id,
-        story_id=page["story_id"],
-        defaults={"current_page_id": page_id}
-    )
-
-    # If it's an ending page AND not preview, record the play
-    if page["is_ending"] and not preview:
+    # Record the play if ending reached
+    if page_content.get("is_ending"):
+        # Save to Django database (anonymous play)
         Play.objects.create(
-            story_id=page["story_id"],
+            story_id=story_id,
             ending_page_id=page_id
         )
-        return render(request, "game/ending.html", {"page": page})
 
-    # Normal page display
-    return render(request, "game/play.html", {"page": page, "preview": preview})
+    # render game ui
+    return render(request, "game/play.html", {
+        "story_id": story_id,
+        "page": page_content
+    })
 
 
-def resume_story(request, story_id):
-    session_id = request.session.get("session_id")
-    if not session_id:
-        return redirect("story_list")
+# def resume_story(request, story_id):
+#     session_id = request.session.get("session_id")
+#     if not session_id:
+#         return redirect("story_list")
     
-    session = PlaySession.objects.filter(
-        session_id = session_id,
-        story_id = story_id
-    ).first()
+#     session = PlaySession.objects.filter(
+#         session_id = session_id,
+#         story_id = story_id
+#     ).first()
 
-    if session:
-        return redirect("play_page", page_id=session.current_page_id)
+#     if session:
+#         return redirect("play_page", page_id=session.current_page_id)
 
-    return redirect("start_story", story_id=story_id)
+#     return redirect("start_story", story_id=story_id)
 
 
 

@@ -29,8 +29,7 @@
       <option value="draft" {% if story.status == 'draft' %}selected{% endif %}>Draft</option>
     </select>
 
-    <button type="submit" 
-            class="px-4 py-2 bg-[#52796F] text-white rounded hover:bg-[#354F52]">
+    <button type="submit" class="px-4 py-2 bg-[#52796F] text-white rounded hover:bg-[#354F52]">
       {% if edit_as_title %} Update Story {% else %} Create Story {% endif %}
     </button>
 
