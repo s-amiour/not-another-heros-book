@@ -8,6 +8,7 @@ from .services import (
     delete_story, get_page_content, get_start_page_id
 )
 
+#>> Note: The context argument property string is so important; without it, the templates won't display properly
 
 def get_session_id(request):
     if "session_id" not in request.session:
@@ -18,20 +19,22 @@ def get_session_id(request):
 
 # --- READ ---
 def story_list(request):
-    stories = get_all_stories() # Fetches from Flask
+    stories = get_all_stories()  # Fetches from Flask
     return render(request, 'game/story_list.html', {'stories': stories})
 
 
 # --- CREATE ---
 def story_create(request):
+    # Submitted form
     if request.method == 'POST':
-        form = StoryForm(request.POST)
+        form = StoryForm(request.POST)  # Constructor; 
         if form.is_valid():
             if create_story(form.cleaned_data):
                 return redirect('story_list')
     else:
+        # Empty form
         form = StoryForm()
-    return render(request, 'game/story_form.html', {'form': form, 'title': 'Create Story'})
+    return render(request, 'game/story_form.html', {'story': form})
 
 
 # --- UPDATE ---
@@ -49,7 +52,7 @@ def story_edit(request, story_id):
         # Pre-fill
         form = StoryForm(initial=story_data)
         
-    return render(request, 'game/story_form.html', {'form': form, 'title': 'Edit Story'})
+    return render(request, 'game/story_form.html', {'story': form, 'edit_as_title': 'true'})
 
 
 # --- DELETE ---
@@ -112,35 +115,21 @@ def resume_story(request, story_id):
     return redirect("start_story", story_id=story_id)
 
 
+
+# View Statistics
 def stats_view(request, story_id):
     plays = Play.objects.filter(story_id=story_id)
     total = plays.count()
+    
     
     endings = plays.values("ending_page_id").annotate(count=Count("id"))
 
     #percentage
     for e in endings:
-        e["percent"] = round(e["count"] / total * 100, 1) if total else 0
+        e["percent"] = round(e["count"] / total * 100, 2) if total else 0
 
     return render(request, "game/stats.html", {
         "total": total,
         "endings": endings,
         # "page": None,  # optional, only for preview
-    })
-
-
-def story_stats(request, story_id):
-    total = Play.objects.filter(story_id=story_id).count()
-    endings = (
-        Play.objects.filter(story_id=story_id)
-        .values("ending_page_id")
-        .annotate(count=Count("id"))
-    )
-
-    for e in endings:
-        e["percent"] = round((e["count"] / total) * 100, 2) if total else 0
-
-    return render(request, "game/stats.html", {
-        "total": total,
-        "endings": endings
     })
