@@ -20,7 +20,7 @@ This project follows a microservice architecture where Flask acts as a headless 
 └── README.md
 ```
 
-my own notes (sultan):
+
 ## Flask comms
 ``` bash
 python -m venv venv
