@@ -20,10 +20,3 @@ This project follows a microservice architecture where Flask acts as a headless 
 └── README.md
 ```
 
-
-## Flask comms
-``` bash
-python -m venv venv
-venv\Scripts\activate
-pip install flask flask-sqlalchemy flask-cors
-```
