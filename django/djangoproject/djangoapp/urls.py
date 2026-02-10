@@ -19,7 +19,17 @@ urlpatterns = [
     # path("play/<int:page_id>/", views.play_page, name="story_play"),
     path("stories/<int:story_id>/play/<int:page_id>/", views.play_page, name="play_page"),
 
+
+    # Resuming story
+    path("stories/<int:story_id>/resume/", views.resume_story, name="resume_story"),
+
+
     # Stats
 
     path("stats/<int:story_id>/", views.stats_view, name="stats"),
+
+
+    # Author
+    path("author/stories/", views.author_story_list, name="author_list"),
+
 ]

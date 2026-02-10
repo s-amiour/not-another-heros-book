@@ -49,3 +49,10 @@ def get_start_page_id(story_id):
     resp = requests.get(f"{API_URL}/stories/{story_id}/start")
     return (resp.json().get("start_page_id") 
             if resp.status_code == 200 else None)
+
+def get_page_label(page_id):
+    resp = requests.get(f"{API_URL}/pages/{page_id}")
+    if resp.status_code == 200:
+        data = resp.json()
+        return data.get("ending_label") or f"Ending #{page_id}"
+    return f"Ending #{page_id}"
