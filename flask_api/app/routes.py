@@ -17,7 +17,8 @@ def get_stories():
         stories = Story.query.all()
 
     return jsonify([
-        {"id": s.id, "title": s.title, "description": s.description}
+        {"id": s.id, "title": s.title, "description": s.description,
+         "status": s.status, "start_page_id": s.start_page_id} 
         for s in stories
     ])
 
@@ -29,6 +30,7 @@ def get_story(story_id):
         "id": story.id,
         "title": story.title,
         "description": story.description,
+        "status": story.status,
         "start_page_id": story.start_page_id
     })
 
@@ -81,7 +83,7 @@ def update_story(story_id):
     story.status = data.get("status", story.status)
     story.start_page_id = data.get("start_page_id", story.start_page_id)
 
-    db.session.commit()
+    db.session.commit()  # SET
     return jsonify({"message": "Story updated"})
 
 
@@ -104,8 +106,10 @@ def get_page(page_id):
 
     return jsonify({
         "id": page.id,
-        "story_id": story.id,              # NEW
-        "story_status": story.status, 
+
+        "story_id": story.id,
+        "story_status": story.status,
+
         "text": page.text,
         "is_ending": page.is_ending,
         "ending_label": page.ending_label,

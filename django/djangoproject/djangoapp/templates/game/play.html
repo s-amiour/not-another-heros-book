@@ -1,32 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto p-8 bg-white rounded shadow">
 
-  <h2 class="text-2xl font-semibold mb-4">{{ page.text }}</h2>
+<div class="max-w-2xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-lg border border-gray-200">
+  
+  <div class="prose prose-lg mb-8 text-gray-800">
+    <p>{{ page.text }}</p>
+  </div>
 
-  {% if page.choices %}
-  <ul class="space-y-2">
-    {% for c in page.choices %}
-      <li>
-        <a href="{% url 'play_page' c.next_page_id %}" 
-           class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-          {{ c.text }}
+  <div class="space-y-4">
+    
+    {% if page.is_ending %}
+      <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
+        <h3 class="font-bold text-lg">THE END</h3>
+        <p>{{ page.ending_label|default:"Game Over" }}</p>
+      </div>
+
+      <div class="flex gap-4 mt-6">
+        <a href="{% url 'start_story' story_id %}" 
+            class="flex-1 text-center py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">
+            Play Again
         </a>
-      </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-    <p class="mt-4 text-gray-600">No choices available.</p>
-  {% endif %}
+        <a href="{% url 'story_list' %}" 
+          class="flex-1 text-center py-3 bg-gray-500 text-white rounded hover:bg-gray-600 font-semibold">
+            Back to Menu
+        </a>
+      </div>
 
-  {% if preview %}
-    <p class="mt-4 text-yellow-600">You are in <strong>preview mode</strong>. Stats will not be recorded.</p>
-  {% endif %}
+    {% else %}
+      <div class="flex flex-col gap-3">
+        <h3 class="font-semibold mb-4">What will you choose?</h3>
+        {% for choice in page.choices %}
+          <a href="{% url 'play_page' story_id=story_id page_id=choice.next_page_id %}" 
+            class="block w-full text-left px-6 py-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-colors duration-200 group">
+            <span class="text-blue-600 group-hover:text-blue-800 font-medium">
+              Step {{ forloop.counter }}:
+            </span>
+            <span class="text-gray-700 group-hover:text-gray-900">
+              {{ choice.text }}
+            </span>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
 
-  <a href="{% url 'story_list' %}" 
-     class="inline-block mt-6 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-    Back to Stories
-  </a>
+  </div>
 </div>
 {% endblock %}
+
