@@ -8,6 +8,7 @@ class Play(models.Model):
     # Track when it happened
     created_at = models.DateTimeField(auto_now_add=True)
 
+
     def __str__(self):
         return f"Story {self.story_id} finished at {self.created_at}"
 

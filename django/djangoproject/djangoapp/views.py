@@ -9,7 +9,9 @@ from .services import (
     delete_story, get_page_content, get_start_page_id, get_page_label
 )
 
+
 #>> Note: The context argument property string is so important; without it, the templates won't display properly
+#>> Sultan: commented out get_session_id() and resume_paeg() for now, uncomment once level13
 
 def get_session_id(request):
     if "session_id" not in request.session:
@@ -20,6 +22,7 @@ def get_session_id(request):
 #############  Story CRUD  #############
 
 # --- READ ---
+
 def story_list(request):
     stories = get_all_stories()  # Fetch all stories from Flask
     query = request.GET.get("q", "").strip().lower()  # Search query
@@ -79,16 +82,44 @@ def story_delete(request, story_id):
 
 
 
+
+def story_create(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description", "")
+        status = request.POST.get("status", "published")
+
+        # Call Flask API to create the story
+        response = requests.post(
+            f"{FLASK_URL}/stories",
+            json={
+                "title": title,
+                "description": description,
+                "status": status
+            }
+        )
+        if response.status_code == 201:
+            return redirect("story_list")  # back to story list after creation
+        else:
+            error = response.json().get("error", "Unknown error")
+            return render(request, "game/story_form.html", {"error": error})
+
+    # GET request: show empty form
+    return render(request, "game/story_form.html")
+
+
 def start_story(request, story_id):
     """
     Redirects the user to the first page of a story.
     Handles preview mode (for draft stories) without recording stats.
     """
     
+    # Get the first page ID from Flask
     start_page_id = get_start_page_id(story_id)
     
     # Check if the story actually has a start page
     if not start_page_id:
+        # If no start page, send user back to story list
         return redirect("story_list")
     
     # Check if this is a draft preview
@@ -108,6 +139,7 @@ def start_story(request, story_id):
     # redirect() takes a string URL and returns an HttpResponseRedirect
     # Do NOT use + on redirect() itself; that causes the TypeError
     return redirect(url)
+
 
 
 def play_page(request, story_id, page_id):
@@ -152,7 +184,6 @@ def play_page(request, story_id, page_id):
         "page": page_content
     })
 
-
 def resume_story(request, story_id):
     session_id = request.session.get("session_id")
     if not session_id:
@@ -165,6 +196,7 @@ def resume_story(request, story_id):
 
     if session:
         return redirect("play_page", story_id=story_id, page_id=session.current_page_id)
+
     return redirect("start_story", story_id=story_id)
 
 
@@ -173,18 +205,21 @@ def stats_view(request, story_id):
     plays = Play.objects.filter(story_id=story_id)
     total = plays.count()
     
+
+    
     endings = plays.values("ending_page_id").annotate(count=Count("id"))
 
+    #percentage
     for e in endings:
-        #percentage
+
         e["percent"] = round(e["count"] / total * 100, 2) if total else 0
-        #ending label
         e["label"] = get_page_label(e["ending_page_id"])
 
     return render(request, "game/stats.html", {
         "total": total,
         "endings": endings,
         # "page": None,  # optional, only for preview
+
     })
 
 
