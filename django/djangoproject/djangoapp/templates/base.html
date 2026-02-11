@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Not Another Hero's Book</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,13 +24,17 @@
 
                 <a href="{% url 'story_create' %}" 
                    class="px-3 py-2 bg-[#52796F] text-[#FDFBF7] rounded hover:bg-[#354F52]">
+
                    Create Story
                 </a>
 
                 {% comment %}
                 Optional: global stats page if implemented
                 <a href="{% url 'global_stats' %}" 
+
+
                    class="px-3 py-2 bg-gray-500 text-[#FDFBF7] rounded hover:bg-gray-600">
+
                    Statistics
                 </a>
                 {% endcomment %}

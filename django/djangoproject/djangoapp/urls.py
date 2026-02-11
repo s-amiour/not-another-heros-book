@@ -9,6 +9,7 @@ urlpatterns = [
     path("stories/<int:story_id>/edit/", views.story_edit, name="story_edit"),
     path("stories/<int:story_id>/delete/", views.story_delete, name="story_delete"),
 
+
     # - Gameplay Routes -
     # Entry point (finds the start page -> Redirects)
     path("stories/<int:story_id>/start/", views.start_story, name="start_story"),
@@ -18,12 +19,17 @@ urlpatterns = [
     # path("play/<int:page_id>/", views.play_page, name="story_play"),
     path("stories/<int:story_id>/play/<int:page_id>/", views.play_page, name="play_page"),
 
+
     # Resuming story
     path("stories/<int:story_id>/resume/", views.resume_story, name="resume_story"),
 
+
     # Stats
+
     path("stats/<int:story_id>/", views.stats_view, name="stats"),
+
 
     # Author
     path("author/stories/", views.author_story_list, name="author_list"),
+
 ]

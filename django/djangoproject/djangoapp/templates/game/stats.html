@@ -4,6 +4,7 @@
 <div class="max-w-4xl mx-auto p-8">
 
   <h2 class="text-2xl font-semibold mb-4">Story Statistics</h2>
+
   <p class="mb-2"><strong>Total plays:</strong> {{ total }}</p>
 
   {% if not endings %}
@@ -12,6 +13,7 @@
   </div>
 
   {% else %}
+
   <table class="w-full border-collapse border border-gray-300 mb-6">
     <tr class="bg-gray-100">
       <th class="border border-gray-300 px-4 py-2">Ending</th>
@@ -19,16 +21,16 @@
       <th class="border border-gray-300 px-4 py-2">Percentage</th>
     </tr>
     {% for ending in endings %}
-    {% if ending.label %}  <!-- to avoid 'None' ending names, which occur if past endings were modified or deleted-->
     <tr>
       <td class="border border-gray-300 px-4 py-2">{{ ending.label }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.count }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.percent }}%</td>
     </tr>
-    {% endif %}
     {% endfor %}
   </table>
+
   {% endif %}
+
 
 
   {% if page %}
