@@ -337,65 +337,65 @@ def seed_database():
     choices = [
         # Haunted Mansion
         # from base+0
-        Choice(id=s1_choice_base+1, page_id=s1_page_base, text="Enter the mansion", next_page_id=s1_page_base+2),
-        Choice(id=s1_choice_base+2, page_id=s1_page_base, text="Walk away", next_page_id=s1_page_base+3),
+        Choice(id=s1_choice_base+1, page_id=s1_page_base, text="Enter the mansion", next_page_id=s1_page_base+1),
+        Choice(id=s1_choice_base+2, page_id=s1_page_base, text="Walk away", next_page_id=s1_page_base+2),
 
         # from base+1
-        Choice(id=s1_choice_base+3, page_id=s1_page_base+1, text="Ascend the Grand Staircase.", next_page_id=s1_page_base+4),
-        Choice(id=s1_choice_base+4, page_id=s1_page_base+1, text="Walk down the Shadowy Hallway.", next_page_id=s1_page_base+5),
+        Choice(id=s1_choice_base+3, page_id=s1_page_base+1, text="Ascend the Grand Staircase.", next_page_id=s1_page_base+3),
+        Choice(id=s1_choice_base+4, page_id=s1_page_base+1, text="Walk down the Shadowy Hallway.", next_page_id=s1_page_base+4),
 
         # from base+3
-        Choice(id=s1_choice_base+5, page_id=s1_page_base+3, text="Enter the Master Bedroom.", next_page_id=s1_page_base+6),
-        Choice(id=s1_choice_base+6, page_id=s1_page_base+3, text="Enter the Library.", next_page_id=s1_page_base+7),
+        Choice(id=s1_choice_base+5, page_id=s1_page_base+3, text="Enter the Master Bedroom.", next_page_id=s1_page_base+5),
+        Choice(id=s1_choice_base+6, page_id=s1_page_base+3, text="Enter the Library.", next_page_id=s1_page_base+6),
 
         # from base+4
-        Choice(id=s1_choice_base+7, page_id=s1_page_base+4, text="Enter the Dining Room.", next_page_id=s1_page_base+8),
-        Choice(id=s1_choice_base+8, page_id=s1_page_base+4, text="Descend into the Basement.", next_page_id=s1_page_base+9),
+        Choice(id=s1_choice_base+7, page_id=s1_page_base+4, text="Enter the Dining Room.", next_page_id=s1_page_base+7),
+        Choice(id=s1_choice_base+8, page_id=s1_page_base+4, text="Descend into the Basement.", next_page_id=s1_page_base+8),
 
         # from base+5
-        Choice(id=s1_choice_base+9, page_id=s1_page_base+5, text="Gaze into the Vanity Mirror to investigate the image.", next_page_id=s1_page_base+10),
-        Choice(id=s1_choice_base+10, page_id=s1_page_base+5, text="Throw open the Wardrobe to confront the noise.", next_page_id=s1_page_base+11),        
+        Choice(id=s1_choice_base+9, page_id=s1_page_base+5, text="Gaze into the Vanity Mirror to investigate the image.", next_page_id=s1_page_base+9),
+        Choice(id=s1_choice_base+10, page_id=s1_page_base+5, text="Throw open the Wardrobe to confront the noise.", next_page_id=s1_page_base+10),        
 
         # from base+6
-        Choice(id=s1_choice_base+11, page_id=s1_page_base+6, text="Read the glowing book.", next_page_id=s1_page_base+12),
-        Choice(id=s1_choice_base+12, page_id=s1_page_base+6, text="Stop the spinning globe.", next_page_id=s1_page_base+13),        
+        Choice(id=s1_choice_base+11, page_id=s1_page_base+6, text="Read the glowing book.", next_page_id=s1_page_base+11),
+        Choice(id=s1_choice_base+12, page_id=s1_page_base+6, text="Stop the spinning globe.", next_page_id=s1_page_base+12),        
 
         # from base+7
-        Choice(id=s1_choice_base+13, page_id=s1_page_base+7, text="Sit down and partake in the feast.", next_page_id=s1_page_base+14),
-        Choice(id=s1_choice_base+14, page_id=s1_page_base+7, text="Dive for the trapdoor under the table.", next_page_id=s1_page_base+15),     
+        Choice(id=s1_choice_base+13, page_id=s1_page_base+7, text="Sit down and partake in the feast.", next_page_id=s1_page_base+13),
+        Choice(id=s1_choice_base+14, page_id=s1_page_base+7, text="Dive for the trapdoor under the table.", next_page_id=s1_page_base+14),     
 
         # from base+8
-        Choice(id=s1_choice_base+15, page_id=s1_page_base+8, text="Use the salt and dagger to break the ritual.", next_page_id=s1_page_base+16),
-        Choice(id=s1_choice_base+16, page_id=s1_page_base+8, text="Step into the circle to accept the power.", next_page_id=s1_page_base+17),  
+        Choice(id=s1_choice_base+15, page_id=s1_page_base+8, text="Use the salt and dagger to break the ritual.", next_page_id=s1_page_base+15),
+        Choice(id=s1_choice_base+16, page_id=s1_page_base+8, text="Step into the circle to accept the power.", next_page_id=s1_page_base+16),  
 
 
         # from base+2
-        Choice(id=s1_choice_base+17, page_id=s1_page_base+2, text="Stay in the car and lock the doors.", next_page_id=s1_page_base+18),
-        Choice(id=s1_choice_base+18, page_id=s1_page_base+2, text="Get out and run into the woods to hide.", next_page_id=s1_page_base+19),
+        Choice(id=s1_choice_base+17, page_id=s1_page_base+2, text="Stay in the car and lock the doors.", next_page_id=s1_page_base+17),
+        Choice(id=s1_choice_base+18, page_id=s1_page_base+2, text="Get out and run into the woods to hide.", next_page_id=s1_page_base+18),
 
         # from base+17
-        Choice(id=s1_choice_base+19, page_id=s1_page_base+17, text="Unlock the door to let the mechanic in.", next_page_id=s1_page_base+20),
-        Choice(id=s1_choice_base+20, page_id=s1_page_base+17, text="Honk the horn to scare them both away.", next_page_id=s1_page_base+21),
+        Choice(id=s1_choice_base+19, page_id=s1_page_base+17, text="Unlock the door to let the mechanic in.", next_page_id=s1_page_base+19),
+        Choice(id=s1_choice_base+20, page_id=s1_page_base+17, text="Honk the horn to scare them both away.", next_page_id=s1_page_base+20),
 
         # from base+18
-        Choice(id=s1_choice_base+21, page_id=s1_page_base+18, text="Investigate the glowing well.", next_page_id=s1_page_base+22),
-        Choice(id=s1_choice_base+22, page_id=s1_page_base+18, text="Head toward the cabin light.", next_page_id=s1_page_base+23),
+        Choice(id=s1_choice_base+21, page_id=s1_page_base+18, text="Investigate the glowing well.", next_page_id=s1_page_base+21),
+        Choice(id=s1_choice_base+22, page_id=s1_page_base+18, text="Head toward the cabin light.", next_page_id=s1_page_base+22),
 
         # from base+19
-        Choice(id=s1_choice_base+23, page_id=s1_page_base+19, text="Help him search for the flare shell.", next_page_id=s1_page_base+24),
-        Choice(id=s1_choice_base+24, page_id=s1_page_base+19, text="Kick the door open and make a run for it together.", next_page_id=s1_page_base+25),
+        Choice(id=s1_choice_base+23, page_id=s1_page_base+19, text="Help him search for the flare shell.", next_page_id=s1_page_base+23),
+        Choice(id=s1_choice_base+24, page_id=s1_page_base+19, text="Kick the door open and make a run for it together.", next_page_id=s1_page_base+24),
 
         # from base+20
-        Choice(id=s1_choice_base+25, page_id=s1_page_base+20, text="Write down the coordinates and try to find them on your phone map.", next_page_id=s1_page_base+26),
-        Choice(id=s1_choice_base+26, page_id=s1_page_base+20, text="Smash the radio to stop the voice.", next_page_id=s1_page_base+27),
+        Choice(id=s1_choice_base+25, page_id=s1_page_base+20, text="Write down the coordinates and try to find them on your phone map.", next_page_id=s1_page_base+25),
+        Choice(id=s1_choice_base+26, page_id=s1_page_base+20, text="Smash the radio to stop the voice.", next_page_id=s1_page_base+26),
 
         # from base+21
-        Choice(id=s1_choice_base+27, page_id=s1_page_base+21, text="Reach down to help the figure.", next_page_id=s1_page_base+28),
-        Choice(id=s1_choice_base+28, page_id=s1_page_base+21, text="Throw a rock into the well to break the illusion.", next_page_id=s1_page_base+29),
+        Choice(id=s1_choice_base+27, page_id=s1_page_base+21, text="Reach down to help the figure.", next_page_id=s1_page_base+27),
+        Choice(id=s1_choice_base+28, page_id=s1_page_base+21, text="Throw a rock into the well to break the illusion.", next_page_id=s1_page_base+28),
 
         # from base+22
-        Choice(id=s1_choice_base+29, page_id=s1_page_base+22, text="Accept the trade.", next_page_id=s1_page_base+30),
-        Choice(id=s1_choice_base+30, page_id=s1_page_base+22, text="Refuse and back away slowly.", next_page_id=s1_page_base+31),
+        Choice(id=s1_choice_base+29, page_id=s1_page_base+22, text="Accept the trade.", next_page_id=s1_page_base+29),
+        Choice(id=s1_choice_base+30, page_id=s1_page_base+22, text="Refuse and back away slowly.", next_page_id=s1_page_base+30),
 
         ################################################################################################################################################################
         
