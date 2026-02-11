@@ -130,9 +130,11 @@ def stats_view(request, story_id):
     
     endings = plays.values("ending_page_id").annotate(count=Count("id"))
 
-    #percentage
     for e in endings:
+        #percentage
         e["percent"] = round(e["count"] / total * 100, 2) if total else 0
+        #ending label
+        e["ending_label"] = get_page_content(e["ending_page_id"])["ending_label"]
 
     return render(request, "game/stats.html", {
         "total": total,

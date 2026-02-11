@@ -14,16 +14,18 @@
   {% else %}
   <table class="w-full border-collapse border border-gray-300 mb-6">
     <tr class="bg-gray-100">
-      <th class="border border-gray-300 px-4 py-2">Ending Page ID</th>
+      <th class="border border-gray-300 px-4 py-2">Ending</th>
       <th class="border border-gray-300 px-4 py-2">Plays</th>
       <th class="border border-gray-300 px-4 py-2">Percentage</th>
     </tr>
     {% for ending in endings %}
+    {% if ending.ending_label %}
     <tr>
-      <td class="border border-gray-300 px-4 py-2">{{ ending.ending_page_id }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ ending.ending_label }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.count }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.percent }}%</td>
     </tr>
+    {% endif %}
     {% endfor %}
   </table>
   {% endif %}
