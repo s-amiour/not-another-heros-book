@@ -4,7 +4,15 @@
 <div class="max-w-4xl mx-auto p-8">
 
   <h2 class="text-2xl font-semibold mb-4">Story Statistics</h2>
+
   <p class="mb-2"><strong>Total plays:</strong> {{ total }}</p>
+
+  {% if not endings %}
+  <div class="text-center py-12 text-gray-500">
+    No plays done for this story. Play it to view its statistics!
+  </div>
+
+  {% else %}
 
   {% if not endings %}
   <div class="text-center py-12 text-gray-500">
@@ -14,19 +22,21 @@
   {% else %}
   <table class="w-full border-collapse border border-gray-300 mb-6">
     <tr class="bg-gray-100">
-      <th class="border border-gray-300 px-4 py-2">Ending Page ID</th>
+      <th class="border border-gray-300 px-4 py-2">Ending</th>
       <th class="border border-gray-300 px-4 py-2">Plays</th>
       <th class="border border-gray-300 px-4 py-2">Percentage</th>
     </tr>
     {% for ending in endings %}
     <tr>
-      <td class="border border-gray-300 px-4 py-2">{{ ending.ending_page_id }}</td>
+      <td class="border border-gray-300 px-4 py-2">{{ ending.label }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.count }}</td>
       <td class="border border-gray-300 px-4 py-2">{{ ending.percent }}%</td>
     </tr>
     {% endfor %}
   </table>
+
   {% endif %}
+
 
 
   {% if page %}
