@@ -3,6 +3,7 @@
 {% block content %}
 <div class="max-w-4xl mx-auto p-8">
 
+  <!-- Search feature -->
   <div class="mb-6">
     <form method="get" class="flex gap-2">
       <input type="text" name="q" placeholder="Search stories by title..." 
@@ -35,6 +36,7 @@
     </div>
   {% else %}
 
+    <!-- CYOA List -->
     <div class="space-y-4">
       <!-- Dynamic -->
       {% for story in stories %}
@@ -56,13 +58,12 @@
 
               <!-- Play -->
               {% if story.status == "published" %}
-
               <a href="{% url 'start_story' story.id %}" 
                  class="px-4 py-2 bg-green-500 text-[#FDFBF7]] rounded hover:bg-green-600">
                 Play
               </a>
-              {% elif story.status == "draft" %}
 
+              {% elif story.status == "draft" %}
               <!-- Resume -->
               {% if request.session.session_id %}
               <a href="{% url 'resume_story' story.id %}"
@@ -70,10 +71,10 @@
                 Resume
               </a>
               {% endif %}
+
               <!-- Draft preview (does not record stats) (NOT YET) -->
               <a href="{% url 'start_story' story.id %}?preview=1" 
                  class="px-4 py-2 bg-gray-500 text-[#FDFBF7] rounded hover:bg-gray-600">
-
                 Preview
               </a>
               {% endif %}
@@ -93,7 +94,6 @@
               </a>
 
               <!-- Delete -->
-
               <form action="{% url 'story_delete' story.id %}" method="post" 
                     onsubmit="return confirm('Are you sure you want to delete this story?');">
                 {% csrf_token %}
