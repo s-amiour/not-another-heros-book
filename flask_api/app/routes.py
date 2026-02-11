@@ -106,10 +106,8 @@ def get_page(page_id):
 
     return jsonify({
         "id": page.id,
-
         "story_id": story.id,
         "story_status": story.status,
-
         "text": page.text,
         "is_ending": page.is_ending,
         "ending_label": page.ending_label,
