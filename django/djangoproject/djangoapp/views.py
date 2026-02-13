@@ -30,6 +30,16 @@ def story_list(request):
     if query:
         # Filter by title (case-insensitive)
         stories = [s for s in stories if query in s.get("title", "").lower()]
+    
+    # Get current session ID
+    session_id = get_session_id(request)
+
+    # For each story, check if there's a saved PlaySession
+    for s in stories:
+        s["has_progress"] = PlaySession.objects.filter(
+            session_id=session_id,
+            story_id=s["id"]
+        ).exists()
 
     return render(request, 'game/story_list.html', {
         'stories': stories,
