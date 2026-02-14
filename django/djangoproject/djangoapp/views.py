@@ -77,6 +77,67 @@ def is_author(user):
 
 def is_admin(user):
     return user.is_staff
+
+# --- READER PROFILE ---
+@login_required
+def user_profile(request):
+    """
+    Requirement: Readers can view their own history.
+    """
+    # Fetch plays by THIS user
+    user_plays = Play.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Optional: Enhance with story titles if your API supports bulk fetching or caching
+    # For now, we display ID and Date
+    return render(request, 'game/profile.html', {'plays': user_plays})
+
+
+# --- ADMIN DASHBOARD ---
+@user_passes_test(is_admin) # Only is_staff allowed
+def admin_dashboard(request):
+    """
+    Requirement: Admins can view global stats and moderate.
+    """
+    # 1. Global Stats
+    total_users = User.objects.count()
+    total_plays = Play.objects.count()
+    
+    # 2. Moderation List (Get ALL stories, including suspended)
+    # We assume our service get_all_stories can accept a flag or we fetch raw
+    all_stories = get_all_stories() # Flask returns everything to admin logic usually
+    
+    return render(request, 'game/admin_dashboard.html', {
+        'total_users': total_users,
+        'total_plays': total_plays,
+        'stories': all_stories
+    })
+
+# --- MODERATION ACTION ---
+@user_passes_test(is_admin)
+@require_POST
+def suspend_story(request, story_id):
+    """
+    Requirement: Admin can suspend a story.
+    """
+    if update_story_status(story_id, "suspended"):
+        messages.success(request, f"Story {story_id} has been SUSPENDED.")
+    else:
+        messages.error(request, "Failed to suspend story.")
+    return redirect('admin_dashboard')
+
+@user_passes_test(is_admin)
+@require_POST
+def unsuspend_story(request, story_id):
+    """
+    Reverse the suspension (set back to published).
+    """
+    if update_story_status(story_id, "published"):
+        messages.success(request, f"Story {story_id} is now published again.")
+    else:
+        messages.error(request, "Failed to unsuspend.")
+    return redirect('admin_dashboard')
+
+
 #############  Story CRUD  #############
 
 # --- READ ---

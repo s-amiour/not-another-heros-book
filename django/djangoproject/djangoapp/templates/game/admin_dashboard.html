@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto p-8">
+    
+    <div class="grid grid-cols-2 gap-6 mb-8">
+        <div class="bg-blue-600 text-white p-6 rounded shadow">
+            <h3 class="text-lg font-semibold">Total Players</h3>
+            <p class="text-4xl font-bold">{{ total_users }}</p>
+        </div>
+        <div class="bg-purple-600 text-white p-6 rounded shadow">
+            <h3 class="text-lg font-semibold">Stories Completed</h3>
+            <p class="text-4xl font-bold">{{ total_plays }}</p>
+        </div>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-4">Content Moderation</h2>
+    <div class="bg-white rounded shadow overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left">ID</th>
+                    <th class="px-6 py-3 text-left">Title</th>
+                    <th class="px-6 py-3 text-left">Status</th>
+                    <th class="px-6 py-3 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for story in stories %}
+                <tr>
+                    <td class="px-6 py-4">{{ story.id }}</td>
+                    <td class="px-6 py-4 font-medium">{{ story.title }}</td>
+                    <td class="px-6 py-4">
+                        {% if story.status == 'published' %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Live</span>
+                        {% elif story.status == 'suspended' %}
+                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">Suspended</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">{{ story.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if story.status == 'published' %}
+                            <form action="{% url 'suspend_story' story.id %}" method="POST">
+                                {% csrf_token %}
+                                <button class="text-red-600 hover:text-red-900 font-bold">Suspend</button>
+                            </form>
+                        {% elif story.status == 'suspended' %}
+                            <form action="{% url 'unsuspend_story' story.id %}" method="POST">
+                                {% csrf_token %}
+                                <button class="text-green-600 hover:text-green-900 font-bold">Unsuspend</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

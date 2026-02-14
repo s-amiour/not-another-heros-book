@@ -3,19 +3,20 @@ from .extensions import db
 from .models import Story, Page, Choice
 import os
 from functools import wraps
+from flask import current_app
 
 # Define blueprint to prevent circular imports
 main_bp = Blueprint('main', __name__)
 
 # --- SECURITY ---
 # Get this from environment variable in production
-API_SECRET = os.environ.get("FLASK_API_KEY", "my_super_secret_key")
+
 
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Check header
-        if request.headers.get('X-API-KEY') != API_SECRET:
+        if request.headers.get('X-API-KEY') != current_app.config['API_KEY']:
             return jsonify({"error": "Unauthorized: Invalid API Key"}), 401
         return f(*args, **kwargs)
     return decorated_function

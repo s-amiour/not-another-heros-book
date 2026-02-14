@@ -55,4 +55,10 @@ urlpatterns = [
     
     # Logout redirects to home or login after logging out
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+
+    path('profile/', views.user_profile, name='user_profile'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('stories/<int:story_id>/suspend/', views.suspend_story, name='suspend_story'),
+    path('stories/<int:story_id>/unsuspend/', views.unsuspend_story, name='unsuspend_story'),
 ]
