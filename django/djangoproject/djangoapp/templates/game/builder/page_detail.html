@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto p-8">
+    <a href="{% url 'story_structure' story_id %}" class="text-indigo-600 hover:underline">← Back to Map</a>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+        
+        <div class="bg-white p-6 rounded shadow border">
+            <h2 class="text-xl font-bold mb-4">Edit Page {{ page.id }}</h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1">Page Text</label>
+                    {{ p_form.text }}
+                </div>
+                
+                <div class="mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        {{ p_form.is_ending }}
+                        <span class="text-sm font-semibold">Mark as Ending Page</span>
+                    </label>
+                    <p class="text-xs text-gray-500 ml-6">Ending pages cannot have choices.</p>
+                </div>
+
+                <button type="submit" name="update_page" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Save Content
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded shadow border">
+            <h2 class="text-xl font-bold mb-4">Choices</h2>
+
+            {% if page.is_ending %}
+                <div class="p-4 bg-yellow-50 text-yellow-800 rounded text-sm">
+                    This is an Ending page. It cannot have choices.
+                </div>
+            {% else %}
+                
+                <div class="space-y-3 mb-8">
+                    {% for choice in page.choices %}
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                        <div>
+                            <p class="font-bold text-sm">{{ choice.text }}</p>
+                            <p class="text-xs text-gray-500">→ Leads to Page {{ choice.next_page_id }}</p>
+                        </div>
+                        <form action="{% url 'choice_delete' story_id page.id choice.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-400 hover:text-red-600">×</button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-400 italic text-sm">No choices added yet.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="border-t pt-4">
+                    <h3 class="font-semibold mb-2">Add New Choice</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-2">
+                            {{ c_form.text }}
+                        </div>
+                        <div class="mb-3">
+                            {{ c_form.next_page_id }}
+                        </div>
+                        
+                        <button type="submit" name="add_choice" class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                            + Add Choice
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

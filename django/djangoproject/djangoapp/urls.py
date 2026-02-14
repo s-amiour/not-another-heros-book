@@ -22,8 +22,23 @@ urlpatterns = [
     path("stories/<int:story_id>/resume/", views.resume_story, name="resume_story"),
 
     # Stats
-    path("stats/<int:story_id>/", views.stats_view, name="stats"),
+    path("stats/<int:story_id>/", views.stats_view, name="stats_view"),
 
     # Author
-    path("author/stories/", views.author_story_list, name="author_list"),
+    path("author/stories/", views.author_story_list, name="author_story_list"),
+
+    # Publish | Unpublish
+    path("stories/<int:story_id>/publish/", views.story_publish, name="story_publish"),
+    path('stories/<int:story_id>/unpublish/', views.story_unpublish, name='story_unpublish'),
+
+
+    # --- BUILDER ---
+    path("stories/<int:story_id>/builder/", views.story_structure, name="story_structure"),
+    path("stories/<int:story_id>/pages/new/", views.page_create_view, name="page_create"),
+    path("stories/<int:story_id>/pages/<int:page_id>/", views.page_edit_view, name="page_edit"),
+    path("stories/<int:story_id>/pages/<int:page_id>/delete/", views.page_delete_view, name="page_delete"),
+    
+    # Choice Delete (Choice creation is handled inside page_edit)
+    path("stories/<int:story_id>/pages/<int:page_id>/choices/<int:choice_id>/delete/", 
+         views.choice_delete_view, name="choice_delete"),
 ]

@@ -2,22 +2,87 @@
 {% block content %}
 <div class="max-w-4xl mx-auto p-8">
 
-<h1 class="text-2xl font-bold mb-6">Author Story Dashboard</h1>
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">My Stories</h1>
+    <a href="{% url 'story_create' %}" class="bg-[#52796F] text-white px-4 py-2 rounded">
+        + New Story
+    </a>
+</div>
 
 {% for story in stories %}
-<div class="border p-4 mb-4 rounded bg-white">
-  <h2 class="font-semibold">{{ story.title }}</h2>
-  <p>{{ story.description }}</p>
-  <span>{{ story.status }}</span>
+<div class="border p-6 mb-4 rounded-lg bg-white shadow-sm hover:shadow-md transition">
+  <div class="flex justify-between items-start">
+      <div>
+          <h2 class="font-bold text-xl text-gray-800">{{ story.title }}</h2>
+          <p class="text-gray-600 mt-1">{{ story.description }}</p>
+          
+          <div class="mt-3">
+              {% if story.status == 'published' %}
+                  <span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-sm rounded">
+                      published
+                  </span>
+              {% else %}
+                  <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                      draft
+                  </span>
+                  <span class="text-xs text-gray-500 ml-2">Only visible to you</span>
+              {% endif %}
+          </div>
+      </div>
 
-  <div class="mt-2 flex gap-2">
-    {% if story.status == "draft" %}
-      <a href="{% url 'start_story' story.id %}?preview=1"
-         class="px-3 py-1 bg-gray-500 text-white rounded">Preview</a>
-    {% endif %}
-    <a href="{% url 'story_edit' story.id %}" class="px-3 py-1 bg-yellow-500 text-white rounded">Edit</a>
+      <div class="flex gap-2 ml-4">
+          {% if story.status == 'draft' %}
+            <a href="{% url 'story_structure' story.id %}" 
+              class="px-4 py-2 bg-indigo-600 text-white font-bold rounded hover:bg-indigo-700 shadow-sm flex items-center gap-2">
+              <span>Populate</span>
+            </a>
+            <a href="{% url 'story_edit' story.id %}" 
+              class="px-4 py-2 bg-yellow-500 text-[#FDFBF7] rounded hover:bg-yellow-600">
+              Edit
+            </a>
+          
+            <a href="{% url 'start_story' story.id %}?preview=1" 
+               class="px-4 py-2 bg-gray-500 text-[#FDFBF7] rounded hover:bg-gray-600">
+               Preview Draft
+            </a>
+            
+            <form action="{% url 'story_delete' story.id %}" method="POST" class="ml-auto">
+              {% csrf_token %}
+              <button type="submit" class="px-4 py-2 bg-red-500 text-[#FDFBF7] rounded hover:bg-red-600"
+                      onclick="return confirm('Delete this draft forever?');">
+                  Delete
+              </button>
+            </form>
+
+            <form action="{% url 'story_publish' story.id %}" method="POST" class="inline">
+              {% csrf_token %}
+              <button type="submit" 
+                      class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      onclick="return confirm('Ready to publish? This will validate your story structure.')">
+                  Publish
+              </button>
+            </form>
+          {% else %}
+            <form action="{% url 'story_unpublish' story.id %}" method="POST" class="inline">
+              {% csrf_token %}
+              <button type="submit" 
+                      class="px-4 py-2 bg-orange-100 text-orange-700 border border-orange-200 rounded hover:bg-orange-200"
+                      onclick="return confirm('This will hide the story from the public list so you can edit it. Proceed?');">
+                  Unpublish to Modify
+              </button>
+            </form>
+
+            <a href="{% url 'start_story' story.id %}" 
+               class="text-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+               Play Live
+            </a>
+          {% endif %}
+      </div>
   </div>
 </div>
+{% empty %}
+    <p class="text-gray-500 italic">You haven't created any stories yet.</p>
 {% endfor %}
+
 </div>
 {% endblock %}

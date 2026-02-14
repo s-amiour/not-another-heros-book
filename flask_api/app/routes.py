@@ -5,6 +5,8 @@ from .models import Story, Page, Choice
 # Define blueprint to prevent circular imports
 main_bp = Blueprint('main', __name__)
 
+
+
 ##############################  Story Routing   ##############################
 
 # Get all
@@ -62,14 +64,37 @@ def get_start_page(story_id):
 @main_bp.route("/stories", methods=["POST"])
 def create_story():
     data = request.json
+    # Create Story instance
     story = Story(
         title=data["title"],
         description=data.get("description", ""),
         status=data.get("status", "published")
     )
     db.session.add(story)
+    db.session.flush()  # Generate story.id immediately
+
+    # Handle start page
+
+    # If the user provided text, use it. Otherwise, use a default.
+    initial_text = data.get("start_text", "The story begins here...")
+    
+    # Create Page instance
+    start_page = Page(
+        story_id=story.id,
+        text=initial_text,
+        is_ending=False
+    )
+    db.session.add(start_page)
+    db.session.flush()  # Generates start_page.id immediately
+
+    # Link story and page (story.start_page_id defined)
+    story.start_page_id = start_page.id
+    
+    # Save everything at once
     db.session.commit()
-    return jsonify({"id": story.id}), 201
+
+
+    return jsonify({"id": story.id, "start_page_id": start_page.id}), 201  # basically used for standard api pinging like postman
 
 
 # Update
@@ -83,9 +108,39 @@ def update_story(story_id):
     story.status = data.get("status", story.status)
     story.start_page_id = data.get("start_page_id", story.start_page_id)
 
-    db.session.commit()  # SET
-    return jsonify({"message": "Story updated"})
+    try:
+        db.session.commit()
+        return jsonify({"message": "Story updated successfully", "id": story.id}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
+@main_bp.route("/stories/<int:story_id>", methods=["PATCH"])
+def update_story_partial(story_id):
+    story = Story.query.get_or_404(story_id)
+    data = request.json
+
+    # 1. Update fields ONLY if they are present in the request
+    if "title" in data:
+        story.title = data["title"]
+        
+    if "description" in data:
+        story.description = data["description"]
+        
+    if "status" in data:
+        # Optional: Add validation here if needed (e.g., only 'draft' or 'published')
+        story.status = data["status"]
+        
+    if "start_page_id" in data:
+        story.start_page_id = data["start_page_id"]
+
+    
+    try:
+        db.session.commit()
+        return jsonify({"message": "Story updated successfully", "id": story.id}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 # Delete
 @main_bp.route("/stories/<int:story_id>", methods=["DELETE"])
@@ -117,6 +172,41 @@ def get_page(page_id):
         ]
     })
 
+# Update (PATCH is preferred for partial updates)
+@main_bp.route("/pages/<int:page_id>", methods=["PATCH"])
+def update_page(page_id):
+    # 1. Fetch the page or return 404
+    page = Page.query.get_or_404(page_id)
+    data = request.json
+
+    # 2. Update fields if they exist in the payload
+    if "text" in data:
+        page.text = data["text"]
+    
+    if "is_ending" in data:
+        page.is_ending = bool(data["is_ending"])
+        
+        # Logic: If it's no longer an ending, clear the ending label
+        if not page.is_ending:
+            page.ending_label = None
+
+    if "ending_label" in data:
+        # Only set label if it's actually an ending
+        if page.is_ending:
+            page.ending_label = data["ending_label"]
+
+    # 3. Commit changes
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "Page updated successfully",
+            "id": page.id,
+            "text": page.text,
+            "is_ending": page.is_ending
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 # Create
 @main_bp.route("/stories/<int:story_id>/pages", methods=["POST"])
@@ -132,8 +222,24 @@ def create_page(story_id):
     db.session.commit()
     return jsonify({"id": page.id}), 201
 
+# Delete
+@main_bp.route("/pages/<int:page_id>", methods=["DELETE"])
+def delete_page(page_id):
+    page = Page.query.get_or_404(page_id)
+    try:
+        # Note: Ensure you have cascading deletes set up in your models, 
+        # otherwise choices pointing TO this page might cause errors.
+        db.session.delete(page)
+        db.session.commit()
+        return jsonify({"message": "Page deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 ##############################  Choice Routing   ##############################
 
+# Create
 @main_bp.route("/pages/<int:page_id>/choices", methods=["POST"])
 def create_choice(page_id):
     data = request.json
@@ -145,3 +251,26 @@ def create_choice(page_id):
     db.session.add(choice)
     db.session.commit()
     return jsonify({"id": choice.id}), 201
+
+# Delete
+@main_bp.route("/choices/<int:choice_id>", methods=["DELETE"])
+def delete_choice(choice_id):
+    choice = Choice.query.get_or_404(choice_id)
+    db.session.delete(choice)
+    db.session.commit()
+    return jsonify({"message": "Choice deleted"})
+
+##############################  Validation   ##############################
+
+
+@main_bp.route("/stories/<int:story_id>/structure")
+def get_story_structure(story_id):
+    pages = Page.query.filter_by(story_id=story_id).all()  # All pages of story
+    # Get all choices for these pages
+    page_ids = [p.id for p in pages]
+    choices = Choice.query.filter(Choice.page_id.in_(page_ids)).all()
+    
+    return jsonify({
+        "pages": [{"id": p.id, "story_id": p.story_id, "text": p.text, "is_ending": p.is_ending, "ending_label": p.ending_label} for p in pages],
+        "choices": [{"id": c.id, "page_id": c.page_id, "text": c.text, "next_page_id": c.next_page_id} for c in choices]
+    })

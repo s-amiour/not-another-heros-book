@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto p-8">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <a href="{% url 'author_story_list' %}" class="text-indigo-600 hover:underline">← Back to Dashboard</a>
+            <h1 class="text-3xl font-bold mt-2">Story Builder</h1>
+        </div>
+        <a href="{% url 'page_create' story_id %}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            + Add New Page
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for page in pages %}
+        <div class="border rounded-lg p-4 bg-white shadow hover:shadow-md transition relative">
+            
+            <div class="flex justify-between items-start mb-2">
+                <span class="font-mono text-xs text-gray-500">ID: {{ page.id }}</span>
+                {% if page.id == start_page_id %}
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">START</span>
+                {% endif %}
+                {% if page.is_ending %}
+                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">ENDING</span>
+                {% endif %}
+            </div>
+
+            <p class="text-gray-800 font-medium mb-4 h-12 overflow-hidden">
+                {{ page.text|truncatechars:60 }}
+            </p>
+
+            <div class="flex gap-2 mt-auto">
+                <a href="{% url 'page_edit' story_id page.id %}" 
+                   class="flex-1 text-center px-3 py-1 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 border border-indigo-200">
+                   Edit Content
+                </a>
+                
+                {% if page.id != start_page_id %}
+                <form action="{% url 'page_delete' story_id page.id %}" method="POST" 
+                      onsubmit="return confirm('Delete Page {{ page.id }}? This might break links pointing to it.');">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-1 text-red-400 hover:text-red-600">
+                        🗑️
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-12 text-gray-500 bg-gray-50 rounded border border-dashed">
+            No pages yet. Click "Add New Page" to begin!
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

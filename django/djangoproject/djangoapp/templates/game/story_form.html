@@ -7,33 +7,41 @@
     {% if edit_as_title %} Edit Story {% else %} Create New Story {% endif %}
   </h2>
 
-  {% if error %}
-    <p class="text-red-600 mb-4">{{ error }}</p>
-  {% endif %}
-
   <!-- FORM -->
   <form method="post">
     {% csrf_token %}
     
-    <label class="block mb-2 font-semibold">Title</label>
+    <label class="block mb-2 font-semibold">Title (max 100 characters)</label>
     <!-- the story context object has already been wrapped with StoryForm => no need for an element enclosing it -->
     {{ story.title|default:'' }}
+    <!-- Error Handler (due to form.is_valid()) -->
+    {% if story.title.errors %}
+      <div class="text-red-600 text-sm mt-1">
+        {% for error in story.title.errors %}
+          <p>{{ error }}</p> 
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <label class="block mb-2 font-semibold">Description</label>
     {{ story.description|default:'' }}
+    <!-- Error Handler (due to form.is_valid()) -->
+    {% if story.description.errors %}
+      <div class="text-red-600 text-sm mt-1">
+        {{ story.description.errors }}
+      </div>
+    {% endif %}
 
-    <label class="block mb-2 font-semibold">Status</label>
-    <select name="status" class="w-full mb-4 px-3 py-2 border rounded">
-      <option value="published" {% if story.status == 'published' %}selected{% endif %}>Published</option>
-      <option value="draft" {% if story.status == 'draft' %}selected{% endif %}>Draft</option>
-    </select>
+    {% if not edit_as_title %}
+      <label class="block mb-2 font-semibold">Start Page Text</label>
+      {{ story.start_text }}
+    {% endif %}
 
     <button type="submit" class="px-4 py-2 bg-[#52796F] text-white rounded hover:bg-[#354F52]">
-      {% if edit_as_title %} Update Story {% else %} Create Story {% endif %}
-
+      {% if edit_as_title %} Save Changes {% else %} Create Draft {% endif %}
     </button>
 
-    <a href="{% url 'story_list' %}" 
+    <a href="{% url 'author_story_list' %}" 
        class="ml-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
       Cancel
     </a>
