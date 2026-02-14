@@ -2,14 +2,14 @@
 
 This project follows a microservice architecture where Flask acts as a headless content API and Django acts as the gameplay engine and user-facing application.
 
-## 🏗 Architecture
+## Architecture
 
 1.  **Flask (The Content Vault)**: Acts as a headless CMS and Logic API. It manages the raw data (Stories, Pages, Choices) and enforces graph topology rules (e.g., ensuring no dead ends). It is secured via API Keys.
 2.  **Django (The Game Engine)**: Handles the user-facing frontend, authentication, session state, and gameplay statistics. It consumes the Flask API to render stories.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 .
@@ -39,23 +39,23 @@ This project follows a microservice architecture where Flask acts as a headless 
 └── README.md
 
 
-## 🌟 Key Features
+## Key Features
 
-### 🔐 Security & Roles
+### Security & Roles
 * **Role-Based Access Control (RBAC)**:
     * **Readers**: Can play published stories and view their own reading history.
     * **Authors**: Can create, edit, and delete *only* their own stories. Includes a visual **Story Builder**.
     * **Admins**: Can view global stats, moderate content, and suspend stories.
 * **API Security**: The Flask API is protected by a secret `X-API-KEY`. Write operations are rejected without valid credentials from the Django server.
 
-### 🎮 Gameplay & Logic
+### Gameplay & Logic
 * **Graph Validation**: Stories must pass strict structural checks (at least one branch, valid endings) before they can be published.
 * **State Persistence**: Player progress is saved between sessions via Django sessions and DB.
 * **Moderation System**: Admins can "Suspend" stories, instantly hiding them from the public and blocking active play sessions.
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. Prerequisites & Clone
 Ensure you have **Python 3** and **Pipenv** installed.
