@@ -8,7 +8,7 @@ class Story(db.Model):
     status = db.Column(db.String(20), default="draft")
     start_page_id = db.Column(db.Integer, nullable=True)  # ID of the first page
 
-
+    author_id = db.Column(db.Integer, nullable=False, default=1)
 
     # Relationship to access pages easily
     pages = db.relationship('Page', backref='story', cascade="all, delete-orphan")

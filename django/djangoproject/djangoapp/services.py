@@ -5,14 +5,24 @@ from django.conf import settings
 from collections import defaultdict
 
 API_URL = getattr(settings, 'FLASK_API_URL', 'http://localhost:5000')
+# We need the secret key here
+API_KEY = getattr(settings, 'FLASK_API_KEY', 'my_super_secret_key')
+
+# Helper to inject headers
+def get_headers():
+    return {'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}
 
 ##############################  Story   ##############################
 
 
 # Get all
-def get_all_stories(status=None):
-    """Fetch list of stories from Flask"""
-    params = {'status': status} if status else {}
+def get_all_stories(status=None, author_id=None):
+    params = {}
+    if status: 
+        params['status'] = status
+    if author_id:
+        params['author_id'] = author_id
+    
     try:
         response = requests.get(f"{API_URL}/stories", params=params)
         return response.json() if response.status_code == 200 else []
@@ -30,34 +40,28 @@ def get_story(story_id):
 # Create
 def create_story(data):
     """Send POST request to Flask API to create a story"""
-    resp = requests.post(f"{API_URL}/stories", json=data)
+    resp = requests.post(f"{API_URL}/stories", json=data, headers=get_headers())
     return resp.status_code == 201
 
 
 # Update
 def update_story(story_id, data):
     """Send PUT request to update story"""
-    resp = requests.put(f"{API_URL}/stories/{story_id}", json=data)
+    resp = requests.patch(f"{API_URL}/stories/{story_id}", json=data, headers=get_headers())
     return resp.status_code == 200
 
 def update_story_status(story_id, new_status):
     """
     Patches the story status via the API.
     """
-    # Assuming your Flask API supports PATCH or PUT for partial updates
-    # Or you can just fetch, update dict, and send back.
     payload = {"status": new_status}
-    try:
-        # Note the use of requests.patch here
-        resp = requests.patch(f"{API_URL}/stories/{story_id}", json=payload, timeout=5)
-        return resp.status_code == 200
-    except requests.RequestException:
-        return False
+    resp = requests.patch(f"{API_URL}/stories/{story_id}", json=payload, headers=get_headers())
+    return resp.status_code == 200
 
 # Delete
 def delete_story(story_id):
     """Send DELETE request to Flask API"""
-    requests.delete(f"{API_URL}/stories/{story_id}")
+    requests.delete(f"{API_URL}/stories/{story_id}", headers=get_headers())
 
 
 def get_start_page_id(story_id):
@@ -69,15 +73,15 @@ def get_start_page_id(story_id):
 ##############################  Page   ##############################
 
 def create_page(story_id, data):
-    resp = requests.post(f"{API_URL}/stories/{story_id}/pages", json=data)
+    resp = requests.post(f"{API_URL}/stories/{story_id}/pages", json=data, headers=get_headers())
     return resp.status_code == 201
 
 def update_page(page_id, data):
-    resp = requests.patch(f"{API_URL}/pages/{page_id}", json=data)
+    resp = requests.patch(f"{API_URL}/pages/{page_id}", json=data, headers=get_headers())
     return resp.status_code == 200
 
 def delete_page(page_id):
-    resp = requests.delete(f"{API_URL}/pages/{page_id}")
+    resp = requests.delete(f"{API_URL}/pages/{page_id}", headers=get_headers())
     return resp.status_code == 200
 
 
@@ -96,21 +100,14 @@ def get_page_label(page_id):
 
 def create_choice(page_id, data):
     # data should be {"text": "...", "target_page_id": 123}
-    resp = requests.post(f"{API_URL}/pages/{page_id}/choices", json=data)
+    resp = requests.post(f"{API_URL}/pages/{page_id}/choices", json=data, headers=get_headers())
     return resp.status_code == 201
 
 def delete_choice(choice_id):
-    resp = requests.delete(f"{API_URL}/choices/{choice_id}")
+    resp = requests.delete(f"{API_URL}/choices/{choice_id}", headers=get_headers())
     return resp.status_code == 200
 
 ##############################  Validation   ##############################
-
-import requests
-from django.conf import settings
-
-API_URL = getattr(settings, 'FLASK_API_URL', 'http://localhost:5000')
-
-# ... (keep existing get/create functions) ...
 
 def validate_story_for_publishing(story_id):
     errors = []

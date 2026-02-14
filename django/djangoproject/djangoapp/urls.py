@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 # Third param is used as named as variable name to be used in templates. this variables per se identifies the urlpattern in urlpatterns
 urlpatterns = [
@@ -41,4 +42,17 @@ urlpatterns = [
     # Choice Delete (Choice creation is handled inside page_edit)
     path("stories/<int:story_id>/pages/<int:page_id>/choices/<int:choice_id>/delete/", 
          views.choice_delete_view, name="choice_delete"),
+
+
+
+    # --- AUTHENTICATION ---
+    path('register/', views.register_view, name='register'),
+    
+    path('login/', auth_views.LoginView.as_view(
+        template_name='registration/login.html',
+        redirect_authenticated_user=True
+    ), name='login'),
+    
+    # Logout redirects to home or login after logging out
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 ]

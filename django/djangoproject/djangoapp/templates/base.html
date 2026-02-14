@@ -21,10 +21,21 @@
                    Home
                 </a>
 
-                <a href="{% url 'author_story_list' %}" 
-                   class="px-3 py-2 bg-[#52796F] text-[#FDFBF7] rounded hover:bg-[#354F52]">
-                   My Stories
-                </a>
+                {% if user.is_authenticated %}
+                <span class="text-gray-300">Hello, {{ user.username }}</span>
+                
+                {% if user.is_staff or 'Author' in user.groups.all.0.name %} 
+                     <a href="{% url 'author_story_list' %}" class="hover:text-yellow-300">Author Dashboard</a>
+                {% endif %}
+
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="hover:text-red-300">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="hover:text-blue-300">Login</a>
+                <a href="{% url 'register' %}" class="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">Sign Up</a>
+            {% endif %}
 
             </div>
         </div>

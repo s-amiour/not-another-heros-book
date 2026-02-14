@@ -3,16 +3,21 @@ from django.db.models import Count
 from django.urls import reverse
 from django.contrib import messages  # Messages to client
 from django.views.decorators.http import require_POST
+from django.contrib.auth.models import Group
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.conf import settings 
+from django.http import HttpResponseForbidden
 import uuid
 import requests
 from .models import Play, PlaySession
-from .forms import StoryForm, PageForm, ChoiceForm
+from .forms import StoryForm, PageForm, ChoiceForm, RegisterForm
 from .services import (
     get_all_stories, get_story, create_story, update_story,
     delete_story, get_page_content, get_start_page_id, get_page_label,
     validate_story_for_publishing, update_story_status, create_page, update_page, delete_page, create_choice, delete_choice,
 )
+from django.contrib.auth.forms import AuthenticationForm
 
 
 API_URL = getattr(settings, 'FLASK_API_URL', 'http://localhost:5000')
@@ -22,16 +27,62 @@ def get_session_id(request):
         request.session["session_id"] = str(uuid.uuid4())
     return request.session["session_id"]
 
+# --- AUTHENTICATION ---
 
+# --- CUSTOM REGISTRATION ---
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('story_list')
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            # 1. Save User
+            user = form.save()
+            
+            # 2. Get Selected Role & Assign Group
+            role_name = form.cleaned_data.get('role')
+            if role_name:
+                group = Group.objects.get(name=role_name)
+                user.groups.add(group)
+            
+            # 3. Auto-Login & Redirect
+            login(request, user)
+            return redirect('story_list')
+    else:
+        form = RegisterForm()
+    
+    return render(request, 'registration/register.html', {'form': form})
+
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('story_list')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+# --- PERMISSION CHECKS (Helpers) ---
+
+def is_author(user):
+    # User is Author if in 'Author' group OR is an Admin
+    return user.groups.filter(name='Author').exists() or user.is_staff
+
+def is_admin(user):
+    return user.is_staff
 #############  Story CRUD  #############
 
 # --- READ ---
 def story_list(request):
-    stories = get_all_stories()  # Fetch all stories from Flask
+    stories = get_all_stories(status="published")  # Fetch all stories from Flask
     query = request.GET.get("q", "").strip().lower()  # Search query
-
-    # Filter only published stories
-    stories = [s for s in stories if s.get("status") == "published"]
 
     if query:
         # Filter by title (case-insensitive)
@@ -47,24 +98,46 @@ def story_list(request):
             story_id=s["id"]
         ).exists()
 
+    # If Admin, fetch suspended ones too for moderation
+    if request.user.is_staff:
+        # Custom logic needed in service to fetch all, or filter client side
+        # For now, let's assume get_all_stories handles standard display
+        pass
+
     return render(request, 'game/story_list.html', {
         'stories': stories,
         'search_query': request.GET.get("q", "")
     })
 
+@login_required
 def author_story_list(request):
-    stories = get_all_stories()  # no filter
+    if not is_author(request.user):
+        messages.error(request, "You need an Author account to view this.")
+        return redirect('story_list')
+
+    # Fetch ONLY this user's stories (or all if admin)
+    if request.user.is_staff:
+        stories = get_all_stories() # Admin sees everything
+    else:
+        stories = get_all_stories(author_id=request.user.id) # Filtered by ID
+    
     return render(request, "game/author_list.html", {"stories": stories})
 
 # --- CREATE ---
+@login_required
 def story_create(request):
-    # Submitted form
+    if not request.user.groups.filter(name='Author').exists() and not request.user.is_staff:
+        return HttpResponseForbidden("Only authors can create stories.")
+
     if request.method == 'POST':
         form = StoryForm(request.POST)  # Constructor; 
         if form.is_valid():
             story_data = form.cleaned_data
             # FORCE DRAFT
             story_data['status'] = 'draft'
+
+            # Attach the Django User ID
+            story_data['author_id'] = request.user.id
 
             if create_story(story_data):  # .cleaned_data (Input Sanitization Wall #2) #1:API SQLAlchemy in flaskapi prepares and executes
                 messages.success(request, "Story draft created! Now add your pages.")  # Action Informer
@@ -121,11 +194,16 @@ def story_unpublish(request, story_id):
 
 
 # --- UPDATE ---
+@login_required
 def story_edit(request, story_id):
     story_data = get_story(story_id)  # Fetch existing data
     if not story_data:
         messages.error(request, "Story not found.")
         return redirect('author_story_list')
+    
+    # PERMISSION CHECK
+    if not is_author_or_admin(request.user, story_data.get('author_id')):
+        return HttpResponseForbidden("You do not own this story.")
         
     # 2. Prevent editing if Published
     if story_data.get('status') == 'published':
@@ -170,7 +248,7 @@ def story_delete(request, story_id):
     return redirect('author_story_list')
 
 #############  Gameplay  #############
-
+@login_required
 def start_story(request, story_id):
     """
     Redirects the user to the first page of a story.
@@ -179,6 +257,19 @@ def start_story(request, story_id):
     
     start_page_id = get_start_page_id(story_id)
     
+    story = get_story(story_id)
+    if story['status'] == 'suspended' and not request.user.is_staff:
+        return render(request, 'game/error.html', {
+            'message': '⛔ This story has been suspended by moderation and cannot be played.'
+        })
+    
+    # 3. Preview Logic (Authors only)
+    preview = request.GET.get("preview")
+    if preview:
+        # Permission: You can only preview YOUR OWN story
+        if str(story.get('author_id')) != str(request.user.id):
+             return HttpResponseForbidden("You cannot preview a draft that isn't yours.")
+
     # Check if the story actually has a start page
     if not start_page_id:
         return redirect("story_list")
@@ -208,6 +299,13 @@ def play_page(request, story_id, page_id):
     2. Checks if it is an ENDING.
     3. If ending -> Save stats to Django DB.
     """
+    story = get_story(story_id)
+    
+    # SUSPENSION CHECK
+    if story['status'] == 'suspended' and not request.user.is_staff:
+        return redirect('story_list')
+
+
     # A. Fetch Content
     page_content = get_page_content(page_id)
     
@@ -229,6 +327,7 @@ def play_page(request, story_id, page_id):
     # Record the play if ending reached
     if page_content.get("is_ending") and not preview:
         Play.objects.create(
+            user=request.user,
             story_id=story_id,
             ending_page_id=page_id
         )
@@ -416,3 +515,15 @@ def choice_delete_view(request, story_id, page_id, choice_id):
     delete_choice(choice_id)
     messages.success(request, "Choice removed.")
     return redirect('page_edit', story_id=story_id, page_id=page_id)
+
+
+# ADMIN
+
+@login_required
+def admin_suspend_story(request, story_id):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Admins only.")
+    
+    update_story_status(story_id, "suspended")
+    messages.warning(request, f"Story {story_id} suspended.")
+    return redirect('story_list')

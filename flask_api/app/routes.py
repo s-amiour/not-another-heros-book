@@ -1,9 +1,24 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from .extensions import db
 from .models import Story, Page, Choice
+import os
+from functools import wraps
 
 # Define blueprint to prevent circular imports
 main_bp = Blueprint('main', __name__)
+
+# --- SECURITY ---
+# Get this from environment variable in production
+API_SECRET = os.environ.get("FLASK_API_KEY", "my_super_secret_key")
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check header
+        if request.headers.get('X-API-KEY') != API_SECRET:
+            return jsonify({"error": "Unauthorized: Invalid API Key"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 
@@ -13,14 +28,30 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route("/stories")
 def get_stories():
     status = request.args.get("status")
-    if status:
-        stories = Story.query.filter_by(status=status).all()
-    else:
-        stories = Story.query.all()
+    author_id = request.args.get("author_id") # Filter by author
 
+    query = Story.query
+
+    if status:
+        query = query.filter_by(status=status)
+    
+    # If looking for published stories, exclude suspended ones explicitly
+    if status == 'published':
+        query = query.filter(Story.status != 'suspended')
+
+    if author_id:
+        query = query.filter_by(author_id=author_id)
+
+    stories = query.all()
+    
     return jsonify([
-        {"id": s.id, "title": s.title, "description": s.description,
-         "status": s.status, "start_page_id": s.start_page_id} 
+        {
+            "id": s.id, 
+            "title": s.title, 
+            "description": s.description,
+            "status": s.status, 
+            "author_id": s.author_id  # Return this so Django knows who owns it
+        } 
         for s in stories
     ])
 
@@ -62,6 +93,7 @@ def get_start_page(story_id):
 
 # Create
 @main_bp.route("/stories", methods=["POST"])
+@require_api_key
 def create_story():
     data = request.json
     # Create Story instance
@@ -99,6 +131,7 @@ def create_story():
 
 # Update
 @main_bp.route("/stories/<int:story_id>", methods=["PUT"])
+@require_api_key
 def update_story(story_id):
     story = Story.query.get_or_404(story_id)
     data = request.json
@@ -116,6 +149,7 @@ def update_story(story_id):
         return jsonify({"error": str(e)}), 500
 
 @main_bp.route("/stories/<int:story_id>", methods=["PATCH"])
+@require_api_key
 def update_story_partial(story_id):
     story = Story.query.get_or_404(story_id)
     data = request.json
@@ -144,6 +178,7 @@ def update_story_partial(story_id):
 
 # Delete
 @main_bp.route("/stories/<int:story_id>", methods=["DELETE"])
+@require_api_key
 def delete_story(story_id):
     story = Story.query.get_or_404(story_id)
     db.session.delete(story)
@@ -174,6 +209,7 @@ def get_page(page_id):
 
 # Update (PATCH is preferred for partial updates)
 @main_bp.route("/pages/<int:page_id>", methods=["PATCH"])
+@require_api_key
 def update_page(page_id):
     # 1. Fetch the page or return 404
     page = Page.query.get_or_404(page_id)
@@ -210,6 +246,7 @@ def update_page(page_id):
 
 # Create
 @main_bp.route("/stories/<int:story_id>/pages", methods=["POST"])
+@require_api_key
 def create_page(story_id):
     data = request.json
     page = Page(
@@ -224,6 +261,7 @@ def create_page(story_id):
 
 # Delete
 @main_bp.route("/pages/<int:page_id>", methods=["DELETE"])
+@require_api_key
 def delete_page(page_id):
     page = Page.query.get_or_404(page_id)
     try:
@@ -241,6 +279,7 @@ def delete_page(page_id):
 
 # Create
 @main_bp.route("/pages/<int:page_id>/choices", methods=["POST"])
+@require_api_key
 def create_choice(page_id):
     data = request.json
     choice = Choice(
@@ -254,6 +293,7 @@ def create_choice(page_id):
 
 # Delete
 @main_bp.route("/choices/<int:choice_id>", methods=["DELETE"])
+@require_api_key
 def delete_choice(choice_id):
     choice = Choice.query.get_or_404(choice_id)
     db.session.delete(choice)

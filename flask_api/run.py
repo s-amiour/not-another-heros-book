@@ -21,14 +21,16 @@ def seed_database():
         title="The Haunted Mansion (16 endings)",
         description="Explore a mysterious mansion and uncover its secrets",
         status="published",
-        start_page_id=1
+        start_page_id=1,
+        author_id=1  # <--- ADDED: Assigns ownership to Django User ID 1
     )
     story2 = Story(
         id=2,
         title="Space Adventure (8 endings)",
         description="Journey through the cosmos",
         status="published",
-        start_page_id=501
+        start_page_id=501,
+        author_id=1  # <--- ADDED: Assigns ownership to Django User ID 1
     )
 
     # Seed Story 1 base page id
@@ -192,7 +194,7 @@ def seed_database():
         ),
         Page(
             id=s1_page_base+24, story_id=1, 
-            text="You fumble in the dark and find the shell. The mechanic loads it and fires upward through the shattered roof. The magnesium flare ignites inside the creature's chest. It shrieks and falls off the car, burning. The car catches fire, but you both scramble out. The mechanic nods at you, a bond forged in fire. You survived the night, but you'll have to walk home.",
+            text="You kick the door open and sprint into the night, leaving the mechanic behind. You hear his screams cut short as you dive into a ditch. You lie there until sunrise, shivering. You survived, but at a terrible cost.",
             is_ending=True, ending_label="The Run"
         ),
 
@@ -211,12 +213,12 @@ def seed_database():
         # Based on base+21 choice
         Page(
             id=s1_page_base+27, story_id=1, 
-            text="You map the coordinates. They point to the exact spot where your car is parked. Suddenly, the GPS voice says, \"You have arrived.\" The car locks engage automatically. The fog fills the interior of the vehicle, smelling of sulfur. You are not on a road anymore. You have been abducted.",
+            text="You reach down. A cold, wet hand grabs yours with iron strength. You try to pull back, but it's too strong. You are dragged headfirst into the well. The water isn't water; it's a portal. You fall through the stars, forever lost in the void between worlds.",
             is_ending=True, ending_label="The Reach"
         ),
         Page(
             id=s1_page_base+28, story_id=1, 
-            text="You punch the radio display, shattering the plastic. The voice stops, but the electronics spark and ignite the dashboard. The fire spreads instantly to the fuel line. You scramble out just as the car explodes. The explosion attracts the police, who find you dazed on the road. You are safe, though you have some explaining to do to your insurance company.",
+            text="You grab a heavy rock and hurl it into the well. The glass-like surface shatters. The glow dies instantly, and the voice screams in anger. The illusion of the well fades, revealing a deep pit trap set by hunters. You walk around it carefully and find the main road. You outsmarted the trap.",
             is_ending=True, ending_label="The Rock"
         ),
 
@@ -362,7 +364,7 @@ def seed_database():
 
         # from base+7
         Choice(id=s1_choice_base+13, page_id=s1_page_base+7, text="Sit down and partake in the feast.", next_page_id=s1_page_base+13),
-        Choice(id=s1_choice_base+14, page_id=s1_page_base+7, text="Dive for the trapdoor under the table.", next_page_id=s1_page_base+14),     
+        Choice(id=s1_choice_base+14, page_id=s1_page_base+7, text="Dive for the trapdoor under the table.", next_page_id=s1_page_base+14),    
 
         # from base+8
         Choice(id=s1_choice_base+15, page_id=s1_page_base+8, text="Use the salt and dagger to break the ritual.", next_page_id=s1_page_base+15),
@@ -397,7 +399,7 @@ def seed_database():
         Choice(id=s1_choice_base+29, page_id=s1_page_base+22, text="Accept the trade.", next_page_id=s1_page_base+29),
         Choice(id=s1_choice_base+30, page_id=s1_page_base+22, text="Refuse and back away slowly.", next_page_id=s1_page_base+30),
 
-        ################################################################################################################################################################
+        # ################################################################################################################################################################
         
         # Space Adventure
         # from base+0
