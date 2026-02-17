@@ -43,7 +43,7 @@ def register_view(request):
             # 2. Get Selected Role & Assign Group
             role_name = form.cleaned_data.get('role')
             if role_name:
-                group = Group.objects.get(name=role_name)
+                group, created = Group.objects.get_or_create(name=role_name)
                 user.groups.add(group)
             
             # 3. Auto-Login & Redirect
