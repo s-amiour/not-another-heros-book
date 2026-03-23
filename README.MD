@@ -5,7 +5,7 @@ Course: Python for Web Programming
 Course code: PROG_PYTH3
 ```
 
-This project follows a microservice architecture where Flask acts as a headless content API and Django acts as the gameplay engine and user-facing application.
+This project follows a microservice architecture where Flask acts as a headless content API and Django acts as the gameplay engine and user-facing application using the MVT architecture.
 
 ## Architecture
 
